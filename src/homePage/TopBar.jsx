@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom'; 
+import { Link } from 'react-router-dom';
 import { Search, MapPin, User, ChevronDown, ShoppingBag, Menu, Loader2 } from 'lucide-react';
-import { useCart } from '../Cart';
+import { useSelector } from 'react-redux';
 
 
 const TopBar = () => {
-  const { cartCount } = useCart();
+  const cartItems = useSelector((state) => state.cart.items);
+  const cartCount = cartItems.length;
   const [activeLocation, setActiveLocation] = useState("Detecting location...");
   const [isLoading, setIsLoading] = useState(true);
   const [isPincodeBoxOpen, setIsPincodeBoxOpen] = useState(false);
@@ -81,8 +82,8 @@ const TopBar = () => {
   };
 
   const renderLocationTrigger = () => (
-    <div 
-      onClick={() => setIsPincodeBoxOpen(!isPincodeBoxOpen)} 
+    <div
+      onClick={() => setIsPincodeBoxOpen(!isPincodeBoxOpen)}
       className="flex items-center space-x-2 ml-2 md:ml-8 md:pl-6 md:border-l border-gray-200 group cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg transition"
     >
       <div className="p-1.5 bg-blue-50 rounded-full">
@@ -132,7 +133,7 @@ const TopBar = () => {
     <header className="w-full bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-[100]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between py-3 lg:h-20 space-y-3 lg:space-y-0">
-          
+
           <div className="flex items-center justify-between lg:justify-start lg:flex-1">
             <div className="flex items-center">
               <button className="p-2 mr-2 lg:hidden text-gray-600">
@@ -185,10 +186,18 @@ const TopBar = () => {
               </div>
               <span className="ml-2 text-sm font-bold text-slate-800">Service Basket</span>
             </Link>
-            <Link to="/login" className="flex items-center space-x-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200">
-              <User size={20} />
-              <span className="text-sm font-semibold">Sign In</span>
-            </Link>
+
+            {useSelector(state => state.auth.user) ? (
+              <Link to="/profile" className="flex items-center space-x-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-lg shadow-blue-200">
+                <User size={20} />
+                <span className="text-sm font-black uppercase tracking-tight">My Profile</span>
+              </Link>
+            ) : (
+              <Link to="/login" className="flex items-center space-x-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-all active:scale-95 shadow-lg shadow-slate-200">
+                <User size={20} />
+                <span className="text-sm font-semibold">Sign In</span>
+              </Link>
+            )}
           </div>
 
         </div>

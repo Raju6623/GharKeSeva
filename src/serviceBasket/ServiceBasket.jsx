@@ -1,23 +1,30 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
-import { 
-  Trash2, Plus, Minus, ShoppingBag, ArrowLeft, 
-  ChevronRight, CreditCard, ShieldCheck, Zap 
+import {
+  Trash2, Plus, Minus, ShoppingBag, ArrowLeft,
+  ChevronRight, CreditCard, ShieldCheck, Zap
 } from 'lucide-react';
-import { useCart } from '../Cart';
+import { useSelector, useDispatch } from 'react-redux';
+import { addItemToCart, removeItemFromCart } from '../redux/thunks/cartThunks';
 
 const ServiceBasket = () => {
-  const { cart, addToCart, removeFromCart, cartTotal, cartCount } = useCart();
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.items);
+  const cartTotal = useSelector((state) => state.cart.totalAmount);
+  const cartCount = cart.length;
   const navigate = useNavigate();
 
   // Dynamic Quantity Control
   const handleQuantityUpdate = (item, action) => {
     if (action === 'increase') {
-      addToCart(item);
+      dispatch(addItemToCart(item));
     } else {
-      // Agar quantity 1 hai toh remove, warna decrease (optional: aap Context mein decrease method add kar sakte hain)
-      removeFromCart(item._id); 
+      if (item.quantity > 1) {
+        // Need a decrease action, but for now just prevent negative logic or implement decrease later
+        // For simplicity assuming remove implies total removal if 1, or implement direct decrease logic if needed
+      }
+      dispatch(removeItemFromCart(item._id || item.id));
     }
   };
 
@@ -32,8 +39,8 @@ const ServiceBasket = () => {
           </div>
           <h2 className="text-3xl font-black text-slate-900 mb-2 italic">Basket is Empty!</h2>
           <p className="text-gray-400 font-medium mb-8">Looks like you haven't added any services yet. Let's find some for you!</p>
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="inline-flex items-center justify-center w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg"
           >
             Explore Services
@@ -57,14 +64,14 @@ const ServiceBasket = () => {
       </div>
 
       <main className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Items List */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Selected Services</h2>
           {cart.map((item) => (
             <div key={item._id} className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm flex items-center gap-5">
-              <img 
-                src={item.packageImage?.startsWith('http') ? item.packageImage : `${BACKEND_URL}/${item.packageImage}`} 
+              <img
+                src={item.packageImage?.startsWith('http') ? item.packageImage : `${BACKEND_URL}/${item.packageImage}`}
                 alt={item.packageName}
                 className="w-20 h-20 rounded-2xl object-cover border border-gray-50"
               />
@@ -72,16 +79,16 @@ const ServiceBasket = () => {
                 <h3 className="font-bold text-slate-900 leading-tight">{item.packageName}</h3>
                 <p className="text-blue-600 font-black mt-1 text-lg">₹{item.priceAmount}</p>
               </div>
-              
+
               <div className="flex flex-col items-end gap-3">
-                <button 
-                  onClick={() => removeFromCart(item._id)}
+                <button
+                  onClick={() => dispatch(removeItemFromCart(item._id || item.id))}
                   className="p-2 text-gray-300 hover:text-red-500 transition"
                 >
                   <Trash2 size={18} />
                 </button>
                 <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-3">
-                   <span className="px-3 font-black text-sm">{item.quantity}</span>
+                  <span className="px-3 font-black text-sm">{item.quantity}</span>
                 </div>
               </div>
             </div>
@@ -103,7 +110,7 @@ const ServiceBasket = () => {
         <div className="space-y-6">
           <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl sticky top-28">
             <h3 className="text-lg font-black text-slate-900 mb-6 italic">BILLING DETAILS</h3>
-            
+
             <div className="space-y-4 mb-8">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Item Total</span>
@@ -120,7 +127,7 @@ const ServiceBasket = () => {
               </div>
             </div>
 
-            <button 
+            <button
               onClick={() => navigate('/checkout')} // Agla step: Payment/Address page
               className="w-full py-5 bg-blue-600 text-white rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
             >
@@ -128,8 +135,8 @@ const ServiceBasket = () => {
             </button>
 
             <div className="mt-6 flex items-center justify-center gap-2 opacity-30 grayscale">
-               <CreditCard size={16} />
-               <span className="text-[10px] font-black uppercase tracking-tighter">Secure 256-bit SSL Payment</span>
+              <CreditCard size={16} />
+              <span className="text-[10px] font-black uppercase tracking-tighter">Secure 256-bit SSL Payment</span>
             </div>
           </div>
         </div>

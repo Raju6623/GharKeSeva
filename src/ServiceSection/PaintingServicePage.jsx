@@ -1,40 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchServices } from '../redux/thunks/serviceThunks';
 import { useNavigate } from 'react-router-dom'; // Navigation add ki
-import { 
-  CheckCircle2, Star, Clock, ShieldCheck, Zap, Info, HelpCircle, 
-  ChevronDown, Paintbrush, Palette, Shield, Loader2, ShoppingCart, Trash2, X 
+import {
+  CheckCircle2, Star, Clock, ShieldCheck, Zap, Info, HelpCircle,
+  ChevronDown, Paintbrush, Palette, Shield, Loader2, ShoppingCart, Trash2, X
 } from 'lucide-react';
-import { useCart } from '../Cart'; // Global Cart Hook add kiya
+import { useSelector, useDispatch } from 'react-redux';
+import { addItemToCart, removeItemFromCart } from '../redux/thunks/cartThunks';
 
 const PaintingServicePage = () => {
-  // --- GLOBAL CART CONTEXT ---
-  const { cart, addToCart, removeFromCart, cartTotal, cartCount } = useCart();
+  // --- REDUX HOOKS ---
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.items);
+  const cartTotal = useSelector((state) => state.cart.totalAmount);
+  const cartCount = cart.length;
   const navigate = useNavigate();
 
   const [projectType, setProjectType] = useState('Full Home');
   const [selectedPaintBrand, setSelectedPaintBrand] = useState('');
-  const [services, setServices] = useState([]); 
-  const [loading, setLoading] = useState(true);
-
-  const BACKEND_URL = "http://localhost:3001";
-
-  // --- 1. FETCH DATA FROM DATABASE ---
-  const fetchPaintingServices = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${BACKEND_URL}/api/auth/services?category=${projectType}`);
-      setServices(response.data);
-    } catch (error) {
-      console.error("Painting data fetch error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // --- REDUX STATE ---
+  const { availableServices: services, loading } = useSelector((state) => state.services);
 
   useEffect(() => {
-    fetchPaintingServices();
-  }, [projectType]);
+    dispatch(fetchServices(projectType));
+  }, [projectType, dispatch]);
 
   const paintBrands = ["Asian Paints", "Berger", "Nerolac", "Dulux", "Indigo", "Other"];
 
@@ -68,17 +57,16 @@ const PaintingServicePage = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex bg-gray-100 p-1.5 rounded-2xl w-fit shadow-inner border border-gray-200">
               {['Full Home', 'Room/Wall'].map((type) => (
                 <button
                   key={type}
                   onClick={() => setProjectType(type)}
-                  className={`px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                    projectType === type 
-                    ? 'bg-white text-blue-600 shadow-md transform scale-105' 
+                  className={`px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${projectType === type
+                    ? 'bg-white text-blue-600 shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   {type}
                 </button>
@@ -92,18 +80,17 @@ const PaintingServicePage = () => {
       <div className="bg-white py-8 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-              Choose Paint Brand <ChevronDown size={18} className="ml-1 text-blue-600" />
+            Choose Paint Brand <ChevronDown size={18} className="ml-1 text-blue-600" />
           </h2>
           <div className="flex flex-wrap gap-3">
             {paintBrands.map((brand) => (
               <button
                 key={brand}
                 onClick={() => setSelectedPaintBrand(brand)}
-                className={`px-6 py-2.5 rounded-full border text-sm font-semibold transition-all ${
-                  selectedPaintBrand === brand 
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg' 
+                className={`px-6 py-2.5 rounded-full border text-sm font-semibold transition-all ${selectedPaintBrand === brand
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg'
                   : 'bg-white border-gray-200 text-gray-600 hover:border-blue-400'
-                }`}
+                  }`}
               >
                 {brand}
               </button>
@@ -114,11 +101,11 @@ const PaintingServicePage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          
+
           <div className="lg:col-span-2 space-y-12">
             <section>
               <h2 className="text-2xl font-black text-slate-900 mb-6 uppercase tracking-tight">Available {projectType} Packages</h2>
-              
+
               {loading ? (
                 <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-600" size={40} /></div>
               ) : services.length > 0 ? (
@@ -129,8 +116,8 @@ const PaintingServicePage = () => {
                       <div key={pkg._id} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:border-blue-300 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group relative overflow-hidden">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                             <h3 className="font-bold text-slate-900 text-xl group-hover:text-blue-600">{pkg.packageName}</h3>
-                             <span className="bg-green-100 text-green-700 text-[10px] font-black px-2 py-0.5 rounded uppercase">Verified</span>
+                            <h3 className="font-bold text-slate-900 text-xl group-hover:text-blue-600">{pkg.packageName}</h3>
+                            <span className="bg-green-100 text-green-700 text-[10px] font-black px-2 py-0.5 rounded uppercase">Verified</span>
                           </div>
                           <p className="text-gray-500 text-sm mb-4 leading-relaxed">{pkg.description || "Premium dust-free painting service."}</p>
                           <div className="flex items-center text-xs text-gray-400 space-x-6 font-bold uppercase tracking-widest">
@@ -142,23 +129,22 @@ const PaintingServicePage = () => {
                             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Starts at</span>
                             <span className="text-3xl font-black text-slate-900 tracking-tighter">₹{pkg.priceAmount}</span>
                           </div>
-                          
+
                           {isInCart ? (
-                            <button 
-                              onClick={() => removeFromCart(pkg._id)}
+                            <button
+                              onClick={() => dispatch(removeItemFromCart(pkg._id || pkg.id))}
                               className="px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition flex items-center gap-2"
                             >
                               Remove <X size={16} />
                             </button>
                           ) : (
-                            <button 
-                              onClick={() => addToCart(pkg)}
+                            <button
+                              onClick={() => dispatch(addItemToCart(pkg))}
                               disabled={!pkg.isServiceActive}
-                              className={`px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest transition shadow-lg active:scale-95 ${
-                                pkg.isServiceActive 
-                                ? 'bg-slate-900 text-white hover:bg-blue-600' 
+                              className={`px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest transition shadow-lg active:scale-95 ${pkg.isServiceActive
+                                ? 'bg-slate-900 text-white hover:bg-blue-600'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                              }`}
+                                }`}
                             >
                               Book Visit
                             </button>
@@ -177,9 +163,9 @@ const PaintingServicePage = () => {
 
             {/* Process Checklist */}
             <section className="bg-slate-900 rounded-[2.5rem] p-10 md:p-14 text-white relative overflow-hidden shadow-2xl">
-               <div className="absolute top-0 right-0 p-8 opacity-5">
-                  <Paintbrush size={200} />
-               </div>
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                <Paintbrush size={200} />
+              </div>
               <h2 className="text-2xl font-black mb-10 relative z-10">Our 5-Step Dust-Free Process</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                 {services[0]?.inclusions?.map((inclusion, index) => (
@@ -206,8 +192,8 @@ const PaintingServicePage = () => {
                         <p className="font-bold text-sm">{item.packageName}</p>
                         <p className="text-xs text-gray-400">₹{item.priceAmount}</p>
                       </div>
-                      <button onClick={() => removeFromCart(item._id)} className="text-red-500 hover:bg-red-50 p-1 rounded transition">
-                        <Trash2 size={16}/>
+                      <button onClick={() => dispatch(removeItemFromCart(item._id || item.id))} className="text-red-500 hover:bg-red-50 p-1 rounded transition">
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   ))}
@@ -215,7 +201,7 @@ const PaintingServicePage = () => {
                     <span>Total:</span>
                     <span className="text-blue-600">₹{cartTotal}</span>
                   </div>
-                  <button 
+                  <button
                     onClick={handleCheckout}
                     className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-900 transition"
                   >
@@ -243,7 +229,7 @@ const PaintingServicePage = () => {
               </div>
               <p className="text-xl font-black">₹{cartTotal}</p>
             </div>
-            <button 
+            <button
               onClick={handleCheckout}
               className="bg-blue-600 px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest"
             >

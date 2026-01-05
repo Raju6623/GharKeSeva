@@ -1,40 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchServices } from '../redux/thunks/serviceThunks';
 import { useNavigate } from 'react-router-dom'; // Navigation add ki
-import { 
-  CheckCircle2, Star, Clock, ShieldCheck, Zap, Info, ChevronDown, 
+import {
+  CheckCircle2, Star, Clock, ShieldCheck, Zap, Info, ChevronDown,
   Monitor, Refrigerator, Tablet as Device, Loader2, ShoppingCart, Trash2, X
 } from 'lucide-react';
-import { useCart } from '../Cart'; // Global Cart Hook add kiya
+import { useSelector, useDispatch } from 'react-redux';
+import { addItemToCart, removeItemFromCart } from '../redux/thunks/cartThunks';
 
 const AppliancesServicePage = () => {
-  // --- GLOBAL CART CONTEXT ---
-  const { cart, addToCart, removeFromCart, cartTotal, cartCount } = useCart();
+  // --- REDUX HOOKS ---
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.items);
+  const cartTotal = useSelector((state) => state.cart.totalAmount);
+  const cartCount = cart.length;
   const navigate = useNavigate();
 
   const [selectedAppliance, setSelectedAppliance] = useState('Washing Machine');
   const [selectedBrand, setSelectedBrand] = useState('');
-  const [services, setServices] = useState([]); 
-  const [loading, setLoading] = useState(true);
-
-  const BACKEND_URL = "http://localhost:3001";
-
-  // --- DATABASE SE DATA FETCH KARNA ---
-  const fetchServices = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${BACKEND_URL}/api/auth/services?category=${selectedAppliance}`);
-      setServices(response.data);
-    } catch (error) {
-      console.error("Error fetching appliance services:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // --- REDUX STATE ---
+  const { availableServices: services, loading } = useSelector((state) => state.services);
 
   useEffect(() => {
-    fetchServices();
-  }, [selectedAppliance]);
+    dispatch(fetchServices(selectedAppliance));
+  }, [selectedAppliance, dispatch]);
 
   const applianceBrands = ["Samsung", "LG", "Whirlpool", "Haier", "Godrej", "Bosch", "IFB", "Panasonic", "Other"];
 
@@ -75,9 +64,8 @@ const AppliancesServicePage = () => {
                 <button
                   key={type}
                   onClick={() => setSelectedAppliance(type)}
-                  className={`px-4 py-3 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${
-                    selectedAppliance === type ? 'bg-white text-blue-600 shadow-md scale-105' : 'text-gray-500'
-                  }`}
+                  className={`px-4 py-3 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${selectedAppliance === type ? 'bg-white text-blue-600 shadow-md scale-105' : 'text-gray-500'
+                    }`}
                 >
                   {type === 'Washing Machine' && <Device size={16} />}
                   {type === 'Refrigerator' && <Refrigerator size={16} />}
@@ -94,16 +82,15 @@ const AppliancesServicePage = () => {
       <div className="bg-white py-8 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-             Select Brand for {selectedAppliance} <ChevronDown size={18} className="ml-1 text-blue-600" />
+            Select Brand for {selectedAppliance} <ChevronDown size={18} className="ml-1 text-blue-600" />
           </h2>
           <div className="flex flex-wrap gap-3">
             {applianceBrands.map((brand) => (
               <button
                 key={brand}
                 onClick={() => setSelectedBrand(brand)}
-                className={`px-5 py-2.5 rounded-full border text-sm font-semibold transition-all ${
-                  selectedBrand === brand ? 'bg-slate-900 text-white' : 'bg-white text-gray-600'
-                }`}
+                className={`px-5 py-2.5 rounded-full border text-sm font-semibold transition-all ${selectedBrand === brand ? 'bg-slate-900 text-white' : 'bg-white text-gray-600'
+                  }`}
               >
                 {brand}
               </button>
@@ -114,11 +101,11 @@ const AppliancesServicePage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          
+
           <div className="lg:col-span-2 space-y-12">
             <section>
               <h2 className="text-2xl font-black text-slate-900 mb-6 uppercase tracking-tight">Expert Packages</h2>
-              
+
               {loading ? (
                 <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-600" size={40} /></div>
               ) : services.length > 0 ? (
@@ -136,23 +123,22 @@ const AppliancesServicePage = () => {
                         </div>
                         <div className="flex items-center justify-between md:flex-col md:items-end gap-2">
                           <span className="text-3xl font-black text-slate-900">₹{pkg.priceAmount}</span>
-                          
+
                           {isInCart ? (
-                            <button 
-                              onClick={() => removeFromCart(pkg._id)}
+                            <button
+                              onClick={() => dispatch(removeItemFromCart(pkg._id || pkg.id))}
                               className="px-10 py-3.5 rounded-xl font-bold text-sm bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition flex items-center gap-2"
                             >
                               Remove <X size={16} />
                             </button>
                           ) : (
-                            <button 
-                              onClick={() => addToCart(pkg)}
+                            <button
+                              onClick={() => dispatch(addItemToCart(pkg))}
                               disabled={!pkg.isServiceActive}
-                              className={`px-10 py-3.5 rounded-xl font-bold text-sm transition shadow-lg active:scale-95 ${
-                                pkg.isServiceActive 
-                                ? 'bg-blue-600 text-white hover:bg-slate-900' 
+                              className={`px-10 py-3.5 rounded-xl font-bold text-sm transition shadow-lg active:scale-95 ${pkg.isServiceActive
+                                ? 'bg-blue-600 text-white hover:bg-slate-900'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                              }`}
+                                }`}
                             >
                               Add to Basket
                             </button>
@@ -195,7 +181,7 @@ const AppliancesServicePage = () => {
                         <p className="font-bold text-sm">{item.packageName}</p>
                         <p className="text-xs text-gray-400">₹{item.priceAmount}</p>
                       </div>
-                      <button onClick={() => removeFromCart(item._id)} className="text-red-500 hover:bg-red-50 p-1 rounded-lg transition">
+                      <button onClick={() => dispatch(removeItemFromCart(item._id || item.id))} className="text-red-500 hover:bg-red-50 p-1 rounded-lg transition">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -204,7 +190,7 @@ const AppliancesServicePage = () => {
                     <span>Total:</span>
                     <span className="text-blue-600">₹{cartTotal}</span>
                   </div>
-                  <button 
+                  <button
                     onClick={handleCheckout}
                     className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black hover:bg-blue-600 transition-colors"
                   >
@@ -238,7 +224,7 @@ const AppliancesServicePage = () => {
               </div>
               <p className="text-xl font-black">₹{cartTotal}</p>
             </div>
-            <button 
+            <button
               onClick={handleCheckout}
               className="bg-blue-600 px-8 py-3 rounded-2xl font-black text-sm hover:bg-blue-700"
             >

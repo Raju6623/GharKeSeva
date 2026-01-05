@@ -1,40 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchServices } from '../redux/thunks/serviceThunks';
 import { useNavigate } from 'react-router-dom'; // Navigation add ki
-import { 
-  CheckCircle2, Star, Clock, ShieldCheck, Zap, Info, 
+import {
+  CheckCircle2, Star, Clock, ShieldCheck, Zap, Info,
   HelpCircle, ChevronDown, Lightbulb, Power, Loader2, ShoppingCart, Trash2, X
 } from 'lucide-react';
-import { useCart } from '../Cart'; // Global Cart Hook add kiya
+import { useSelector, useDispatch } from 'react-redux';
+import { addItemToCart, removeItemFromCart } from '../redux/thunks/cartThunks';
 
 const ElectricianServicePage = () => {
-  // --- GLOBAL CART CONTEXT ---
-  const { cart, addToCart, removeFromCart, cartTotal, cartCount } = useCart();
+  // --- REDUX HOOKS ---
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.items);
+  const cartTotal = useSelector((state) => state.cart.totalAmount);
+  const cartCount = cart.length;
   const navigate = useNavigate();
 
   const [selectedServiceType, setSelectedServiceType] = useState('Repair');
   const [selectedFixArea, setSelectedFixArea] = useState('');
-  const [services, setServices] = useState([]); 
-  const [loading, setLoading] = useState(true);
-
-  const BACKEND_URL = "http://localhost:3001";
-
-  // --- 1. DATA FETCHING FROM DATABASE ---
-  const fetchElectricianServices = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${BACKEND_URL}/api/auth/services?category=${selectedServiceType}`);
-      setServices(response.data);
-    } catch (error) {
-      console.error("Electrician data load error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // --- REDUX STATE ---
+  const { availableServices: services, loading } = useSelector((state) => state.services);
 
   useEffect(() => {
-    fetchElectricianServices();
-  }, [selectedServiceType]);
+    dispatch(fetchServices(selectedServiceType));
+  }, [selectedServiceType, dispatch]);
 
   const electricalAreas = ["Switchboard", "Ceiling Fan", "Lighting", "MCB Box", "AC Wiring", "Other"];
 
@@ -68,17 +57,16 @@ const ElectricianServicePage = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex bg-gray-100 p-1.5 rounded-2xl w-fit shadow-inner border border-gray-200">
               {['Repair', 'Installation'].map((type) => (
                 <button
                   key={type}
                   onClick={() => setSelectedServiceType(type)}
-                  className={`px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                    selectedServiceType === type 
-                    ? 'bg-white text-blue-600 shadow-md transform scale-105' 
+                  className={`px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${selectedServiceType === type
+                    ? 'bg-white text-blue-600 shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   {type}
                 </button>
@@ -92,18 +80,17 @@ const ElectricianServicePage = () => {
       <div className="bg-white py-8 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-              Where is the issue? <ChevronDown size={18} className="ml-1 text-blue-600" />
+            Where is the issue? <ChevronDown size={18} className="ml-1 text-blue-600" />
           </h2>
           <div className="flex flex-wrap gap-3">
             {electricalAreas.map((area) => (
               <button
                 key={area}
                 onClick={() => setSelectedFixArea(area)}
-                className={`px-6 py-2 rounded-full border text-sm font-semibold transition-all ${
-                  selectedFixArea === area 
-                  ? 'bg-slate-900 border-slate-900 text-white shadow-lg' 
+                className={`px-6 py-2 rounded-full border text-sm font-semibold transition-all ${selectedFixArea === area
+                  ? 'bg-slate-900 border-slate-900 text-white shadow-lg'
                   : 'bg-white border-gray-200 text-gray-600 hover:border-blue-400'
-                }`}
+                  }`}
               >
                 {area}
               </button>
@@ -114,11 +101,11 @@ const ElectricianServicePage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          
+
           <div className="lg:col-span-2 space-y-12">
             <section>
               <h2 className="text-2xl font-black text-slate-900 mb-6">Available {selectedServiceType} Packages</h2>
-              
+
               {loading ? (
                 <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-600" size={40} /></div>
               ) : services.length > 0 ? (
@@ -137,23 +124,22 @@ const ElectricianServicePage = () => {
                         </div>
                         <div className="flex items-center justify-between md:flex-col md:items-end gap-2 w-full md:w-auto">
                           <span className="text-3xl font-black text-slate-900 tracking-tighter">₹{pkg.priceAmount}</span>
-                          
+
                           {isInCart ? (
-                            <button 
-                              onClick={() => removeFromCart(pkg._id)}
+                            <button
+                              onClick={() => dispatch(removeItemFromCart(pkg._id || pkg.id))}
                               className="px-10 py-3.5 rounded-xl font-bold text-sm bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition flex items-center gap-2"
                             >
                               Remove <X size={16} />
                             </button>
                           ) : (
-                            <button 
-                              onClick={() => addToCart(pkg)}
+                            <button
+                              onClick={() => dispatch(addItemToCart(pkg))}
                               disabled={!pkg.isServiceActive}
-                              className={`px-10 py-3.5 rounded-xl font-bold text-sm transition shadow-lg active:scale-95 ${
-                                pkg.isServiceActive 
-                                ? 'bg-blue-600 text-white hover:bg-slate-900' 
+                              className={`px-10 py-3.5 rounded-xl font-bold text-sm transition shadow-lg active:scale-95 ${pkg.isServiceActive
+                                ? 'bg-blue-600 text-white hover:bg-slate-900'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                              }`}
+                                }`}
                             >
                               Add to Basket
                             </button>
@@ -172,9 +158,9 @@ const ElectricianServicePage = () => {
 
             {/* Safety Protocol */}
             <section className="bg-slate-900 rounded-[2.5rem] p-10 md:p-14 text-white relative overflow-hidden shadow-2xl">
-               <div className="absolute top-0 right-0 p-8 opacity-10">
-                  <Power size={150} />
-               </div>
+              <div className="absolute top-0 right-0 p-8 opacity-10">
+                <Power size={150} />
+              </div>
               <h2 className="text-2xl font-black mb-8 relative z-10">Electrical Safety Protocol</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 {services[0]?.inclusions?.map((inclusion, index) => (
@@ -201,7 +187,7 @@ const ElectricianServicePage = () => {
                         <p className="font-bold text-sm">{item.packageName}</p>
                         <p className="text-xs text-gray-400">₹{item.priceAmount}</p>
                       </div>
-                      <button onClick={() => removeFromCart(item._id)} className="text-red-500 hover:bg-red-50 p-1 rounded transition">
+                      <button onClick={() => dispatch(removeItemFromCart(item._id || item.id))} className="text-red-500 hover:bg-red-50 p-1 rounded transition">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -210,7 +196,7 @@ const ElectricianServicePage = () => {
                     <span>Total:</span>
                     <span className="text-blue-600">₹{cartTotal}</span>
                   </div>
-                  <button 
+                  <button
                     onClick={handleCheckout}
                     className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-blue-600 transition"
                   >
@@ -226,13 +212,13 @@ const ElectricianServicePage = () => {
 
             {/* GharKeSeva Security Section */}
             <div className="bg-white p-6 rounded-3xl border border-gray-100">
-               <h4 className="font-bold text-slate-900 mb-4 border-b pb-2">GharKeSeva Security</h4>
-               <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Lightbulb className="text-yellow-500 flex-shrink-0" size={20} />
-                    <p className="text-xs text-gray-500">We use high-grade voltage testers and insulated tools for every repair.</p>
-                  </div>
-               </div>
+              <h4 className="font-bold text-slate-900 mb-4 border-b pb-2">GharKeSeva Security</h4>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Lightbulb className="text-yellow-500 flex-shrink-0" size={20} />
+                  <p className="text-xs text-gray-500">We use high-grade voltage testers and insulated tools for every repair.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -251,7 +237,7 @@ const ElectricianServicePage = () => {
               </div>
               <p className="text-xl font-black">₹{cartTotal}</p>
             </div>
-            <button 
+            <button
               onClick={handleCheckout}
               className="bg-blue-600 px-8 py-3 rounded-2xl font-black text-sm"
             >

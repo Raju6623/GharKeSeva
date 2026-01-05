@@ -1,44 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchServices } from '../redux/thunks/serviceThunks';
 import { useNavigate } from 'react-router-dom';
-import { 
-  CheckCircle2, Star, Clock, ShieldCheck, Snowflake, Zap, 
-  Info, HelpCircle, ChevronDown, Loader2, ShoppingBag, X 
+import {
+  CheckCircle2, Star, Clock, ShieldCheck, Snowflake, Zap,
+  Info, HelpCircle, ChevronDown, Loader2, ShoppingBag, X
 } from 'lucide-react';
-import { useCart } from '../Cart';
+import { useSelector, useDispatch } from 'react-redux';
+import { addItemToCart, removeItemFromCart } from '../redux/thunks/cartThunks';
 
 
 const AcServicePage = () => {
-  const { cart, addToCart, removeFromCart, cartTotal, cartCount } = useCart();
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.items);
+  const cartTotal = useSelector((state) => state.cart.totalAmount);
+  const cartCount = cart.length;
   const navigate = useNavigate();
-  const [services, setServices] = useState([]);
   const [selectedServiceType, setSelectedServiceType] = useState('Split AC');
   const [selectedBrand, setSelectedBrand] = useState('');
-  const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = "http://localhost:3001";
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${BACKEND_URL}/api/auth/services?category=${selectedServiceType}`);
-      setServices(response.data);
-    } catch (error) {
-      console.error("Error fetching services:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // --- REDUX STATE ---
+  const { availableServices: services, loading } = useSelector((state) => state.services);
 
   useEffect(() => {
-    fetchData();
-  }, [selectedServiceType]);
+    dispatch(fetchServices(selectedServiceType));
+  }, [selectedServiceType, dispatch]);
 
   const acBrands = ["Voltas", "LG", "Samsung", "Daikin", "Hitachi", "Blue Star", "Lloyd", "Carrier"];
   const defaultInclusions = [
-    "Indoor Coil Jet Wash", 
-    "Outdoor Unit Cleaning", 
-    "Drainage Pipe Clearout", 
+    "Indoor Coil Jet Wash",
+    "Outdoor Unit Cleaning",
+    "Drainage Pipe Clearout",
     "10-Point Health Check"
   ];
 
@@ -64,17 +55,16 @@ const AcServicePage = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex bg-gray-100 p-1.5 rounded-2xl w-fit shadow-inner">
               {['Split AC', 'Window AC'].map((type) => (
                 <button
                   key={type}
                   onClick={() => setSelectedServiceType(type)}
-                  className={`px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                    selectedServiceType === type 
-                    ? 'bg-white text-blue-600 shadow-md transform scale-105' 
+                  className={`px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${selectedServiceType === type
+                    ? 'bg-white text-blue-600 shadow-md transform scale-105'
                     : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   {type}
                 </button>
@@ -87,18 +77,17 @@ const AcServicePage = () => {
       <div className="bg-white py-8 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-             Select your AC Brand <ChevronDown size={18} className="ml-1 text-blue-600" />
+            Select your AC Brand <ChevronDown size={18} className="ml-1 text-blue-600" />
           </h2>
           <div className="flex flex-wrap gap-3">
             {acBrands.map((brand) => (
               <button
                 key={brand}
                 onClick={() => setSelectedBrand(brand)}
-                className={`px-5 py-2 rounded-full border text-sm font-semibold transition-all ${
-                  selectedBrand === brand 
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg' 
+                className={`px-5 py-2 rounded-full border text-sm font-semibold transition-all ${selectedBrand === brand
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg'
                   : 'bg-white border-gray-200 text-gray-600 hover:border-blue-400'
-                }`}
+                  }`}
               >
                 {brand}
               </button>
@@ -109,7 +98,7 @@ const AcServicePage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          
+
           <div className="lg:col-span-2 space-y-12">
             <section>
               <h2 className="text-2xl font-black text-slate-900 mb-6">
@@ -126,25 +115,25 @@ const AcServicePage = () => {
                     const isInCart = cart.some(item => item._id === pkg._id);
                     return (
                       <div key={pkg._id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:border-blue-300 transition-all flex flex-col md:flex-row gap-6 items-start md:items-center relative overflow-hidden">
-                        
+
                         <div className="w-full md:w-32 h-32 flex-shrink-0">
                           {pkg.packageImage ? (
-                            <img 
-                              src={pkg.packageImage.startsWith('http') ? pkg.packageImage : `${BACKEND_URL}/${pkg.packageImage}`} 
-                              alt={pkg.packageName} 
+                            <img
+                              src={pkg.packageImage.startsWith('http') ? pkg.packageImage : `${BACKEND_URL}/${pkg.packageImage}`}
+                              alt={pkg.packageName}
                               className="w-full h-full object-cover rounded-2xl border border-gray-100 shadow-inner"
                             />
                           ) : (
                             <div className="w-full h-full bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400">
-                               <Zap size={24} />
+                              <Zap size={24} />
                             </div>
                           )}
                         </div>
 
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                             <h3 className="font-bold text-slate-900 text-lg">{pkg.packageName}</h3>
-                             {!pkg.isServiceActive && <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                            <h3 className="font-bold text-slate-900 text-lg">{pkg.packageName}</h3>
+                            {!pkg.isServiceActive && <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
                           </div>
                           <p className="text-gray-500 text-sm mb-3">
                             {pkg.description || `Professional ${pkg.serviceCategory} service with skilled technicians.`}
@@ -157,23 +146,22 @@ const AcServicePage = () => {
 
                         <div className="flex items-center justify-between w-full md:w-auto md:flex-col md:items-end gap-2">
                           <span className="text-2xl font-black text-slate-900">₹{pkg.priceAmount}</span>
-                          
+
                           {isInCart ? (
-                            <button 
-                              onClick={() => removeFromCart(pkg._id)}
+                            <button
+                              onClick={() => dispatch(removeItemFromCart(pkg._id || pkg.id))}
                               className="px-8 py-3 rounded-xl font-bold text-sm bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition flex items-center gap-2"
                             >
                               Remove <X size={16} />
                             </button>
                           ) : (
-                            <button 
-                              onClick={() => addToCart(pkg)}
+                            <button
+                              onClick={() => dispatch(addItemToCart(pkg))}
                               disabled={!pkg.isServiceActive}
-                              className={`px-8 py-3 rounded-xl font-bold text-sm transition active:scale-95 shadow-lg ${
-                                pkg.isServiceActive 
-                                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100' 
+                              className={`px-8 py-3 rounded-xl font-bold text-sm transition active:scale-95 shadow-lg ${pkg.isServiceActive
+                                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                              }`}
+                                }`}
                             >
                               Add to Basket
                             </button>
@@ -185,15 +173,15 @@ const AcServicePage = () => {
                 </div>
               ) : (
                 <div className="bg-white p-10 rounded-3xl text-center border border-dashed border-gray-300">
-                   <p className="text-gray-500">No packages found for this category in database.</p>
+                  <p className="text-gray-500">No packages found for this category in database.</p>
                 </div>
               )}
             </section>
 
             <section className="bg-slate-900 rounded-[2.5rem] p-8 md:p-12 text-white relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-8 opacity-10">
-                  <Snowflake size={120} />
-               </div>
+              <div className="absolute top-0 right-0 p-8 opacity-10">
+                <Snowflake size={120} />
+              </div>
               <h2 className="text-2xl font-black mb-8">What's included in {selectedServiceType} service?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 {defaultInclusions.map((inclusion, index) => (
@@ -246,7 +234,7 @@ const AcServicePage = () => {
                 <p className="text-xl font-black">₹{cartTotal}</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => navigate('/basket')}
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-black text-sm transition-all active:scale-95 flex items-center gap-2"
             >

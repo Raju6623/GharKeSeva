@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
-import { 
-  Mail, Lock, ArrowRight, Eye, EyeOff, 
-  ShieldCheck, CheckCircle2, Sparkles, Loader2 
+import React, { useState, useEffect } from 'react';
+import {
+  Mail, Lock, ArrowRight, Eye, EyeOff,
+  ShieldCheck, CheckCircle2, Sparkles, Loader2
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import io from 'socket.io-client';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../redux/thunks/authThunks';
+import toast from 'react-hot-toast';
 
 const socket = io('http://localhost:3001');
 
 const LoginScreen = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Check authentication status from Redux state
+  const { loading, error } = useSelector((state) => state.auth);
+
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -24,29 +30,21 @@ const LoginScreen = () => {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    try {
-      const res = await axios.post('http://localhost:3001/api/auth/login', {
-        userEmail: formData.email,
-        userPassword: formData.password
-      });
+    // Dispatch Login Action
+    const resultAction = await dispatch(loginUser(formData));
 
-      if (res.data.success) {
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        
-        // --- ADDED: Socket join room logic ---
-        const userId = res.data.user._id || res.data.user.id;
-        socket.emit('join_room', userId);
-        
-        alert(`Welcome back, ${res.data.user.name}!`);
-        navigate('/'); 
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Invalid Credentials");
-    } finally {
-      setIsLoading(false);
+    if (loginUser.fulfilled.match(resultAction)) {
+      const user = resultAction.payload;
+
+      // Socket Join Room
+      const userId = user._id || user.id;
+      socket.emit('join_room', userId);
+
+      toast.success(`Welcome back, ${user.name}!`);
+      navigate('/');
+    } else {
+      toast.error(resultAction.payload || "Login Failed");
     }
   };
 
@@ -57,11 +55,11 @@ const LoginScreen = () => {
       </div>
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-12">
-          <div className="p-2 bg-blue-600 rounded-xl"><ShieldCheck size={24}/></div>
+          <div className="p-2 bg-blue-600 rounded-xl"><ShieldCheck size={24} /></div>
           <span className="text-2xl font-black tracking-tighter">GharKeSeva</span>
         </div>
         <h1 className="text-5xl font-black leading-tight tracking-tighter mb-6">
-          Premium Care <br/>
+          Premium Care <br />
           <span className="text-blue-500">Back in Action.</span>
         </h1>
       </div>
@@ -96,8 +94,8 @@ const LoginScreen = () => {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              <button disabled={isLoading} className="w-full bg-slate-900 text-white py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] mt-4 hover:bg-blue-600 transition-all shadow-xl active:scale-95 disabled:opacity-70 flex justify-center items-center">
-                {isLoading ? <Loader2 className="animate-spin" size={18} /> : "Enter Dashboard"}
+              <button disabled={loading} className="w-full bg-slate-900 text-white py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] mt-4 hover:bg-blue-600 transition-all shadow-xl active:scale-95 disabled:opacity-70 flex justify-center items-center">
+                {loading ? <Loader2 className="animate-spin" size={18} /> : "Enter Dashboard"}
               </button>
             </form>
             <p className="text-center mt-12 text-sm font-bold text-slate-400">
