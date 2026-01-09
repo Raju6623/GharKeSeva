@@ -15,6 +15,9 @@ const bookingSlice = createSlice({
         clearCurrentBooking: (state) => {
             state.currentBooking = null;
         },
+        updateDraftBooking: (state, action) => {
+            state.draftBooking = { ...state.draftBooking, ...action.payload };
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -38,5 +41,5 @@ const bookingSlice = createSlice({
     },
 });
 
-export const { clearCurrentBooking } = bookingSlice.actions;
+export const { clearCurrentBooking, updateDraftBooking } = bookingSlice.actions;
 export default bookingSlice.reducer;

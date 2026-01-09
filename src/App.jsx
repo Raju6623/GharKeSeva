@@ -19,7 +19,8 @@ import RegisterScreen from './AuthCode/RegisterScreen'
 import LoginScreen from './AuthCode/LoginScreen'
 import ContactPage from './homePage/ContactPage'
 import ServiceBasket from './serviceBasket/ServiceBasket'
-import CheckoutPage from './Checkout/CheckoutPage'
+// import CheckoutPage from './Checkout/CheckoutPage'
+import AddressSelection from './serviceBasket/AddressSelection'
 import MyBookings from './bookingService/MyBookings'
 import UserProfile from './bookingService/UserProfile'
 
@@ -42,7 +43,7 @@ function App() {
         <Route path="/contact" element={<ContactPage />} />
 
         {/* Public Service Routes */}
-        <Route path="/basket" element={<ServiceBasket />} />
+        <Route path="/basket" element={<AddressSelection />} />
         <Route path="/services/acservice" element={<AcServicePage />} />
         <Route path="/services/carpenter-service" element={<CarpenterServicePage />} />
         <Route path="/services/appliances-service" element={<AppliancesServicePage />} />
@@ -60,7 +61,7 @@ function App() {
           path="/checkout"
           element={
             <PrivateRoute>
-              <CheckoutPage />
+              <AddressSelection />
             </PrivateRoute>
           }
         />

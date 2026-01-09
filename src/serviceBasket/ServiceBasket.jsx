@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
 import {
   Trash2, Plus, Minus, ShoppingBag, ArrowLeft,
-  ChevronRight, CreditCard, ShieldCheck, Zap
+  ChevronRight, CreditCard, ShieldCheck, Zap,
+  Home, Edit2, TicketPercent
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addItemToCart, removeItemFromCart } from '../redux/thunks/cartThunks';
@@ -15,20 +15,52 @@ const ServiceBasket = () => {
   const cartCount = cart.length;
   const navigate = useNavigate();
 
-  // Dynamic Quantity Control
+  // Tipping State
+  const [tip, setTip] = useState(0);
+  const [customTip, setCustomTip] = useState('');
+  const [isCustomTip, setIsCustomTip] = useState(false);
+
+  // User Address (Mock/Redux)
+  // const userAddress = "Home - Fffgg, Yella Reddy Guda, Hyderabad, ..."; 
+  // Let's grab it closer to the real data if available, or just mocking for the UI match
+  const authUser = useSelector((state) => state.auth.user);
+  const userAddress = authUser
+    ? (authUser.houseNo ? `${authUser.houseNo}, ${authUser.streetArea}, ${authUser.city}` : "Add Address")
+    : "Home - Fffgg, Yella Reddy Guda, Hyderabad, ...";
+
+
   const handleQuantityUpdate = (item, action) => {
     if (action === 'increase') {
       dispatch(addItemToCart(item));
     } else {
-      if (item.quantity > 1) {
-        // Need a decrease action, but for now just prevent negative logic or implement decrease later
-        // For simplicity assuming remove implies total removal if 1, or implement direct decrease logic if needed
-      }
       dispatch(removeItemFromCart(item._id || item.id));
     }
   };
 
+  const handleTipSelection = (amount) => {
+    setIsCustomTip(false);
+    if (tip === amount) {
+      setTip(0); // Toggle off
+    } else {
+      setTip(amount);
+    }
+  };
+
+  const handleCustomTipChange = (e) => {
+    const val = e.target.value;
+    if (val === '' || /^\d+$/.test(val)) {
+      setCustomTip(val);
+      setTip(Number(val));
+    }
+  };
+
   const BACKEND_URL = "http://localhost:3001";
+
+  // Calculations
+  const discount = 600; // Fixed "Free service offer" as per screenshot
+  // Ensure we don't go negative if total is low, though typically this offer implies a waiver
+  const finalTotal = cartTotal + tip - discount;
+  const payAmount = finalTotal > 0 ? finalTotal : 0;
 
   if (cartCount === 0) {
     return (
@@ -38,7 +70,7 @@ const ServiceBasket = () => {
             <ShoppingBag size={48} />
           </div>
           <h2 className="text-3xl font-black text-slate-900 mb-2 italic">Basket is Empty!</h2>
-          <p className="text-gray-400 font-medium mb-8">Looks like you haven't added any services yet. Let's find some for you!</p>
+          <p className="text-gray-400 font-medium mb-8">Looks like you haven't added any services yet.</p>
           <Link
             to="/"
             className="inline-flex items-center justify-center w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg"
@@ -51,96 +83,180 @@ const ServiceBasket = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20 font-sans">
+    <div className="min-h-screen bg-white pb-32 font-sans">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-40 px-4 py-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full transition">
-            <ArrowLeft size={24} className="text-slate-900" />
-          </button>
-          <h1 className="text-xl font-black italic text-slate-900 tracking-tight">SERVICE BASKET ({cartCount})</h1>
-          <div className="w-10"></div> {/* Spacer */}
+      <div className="bg-white sticky top-0 z-40 px-4 py-4 flex items-center gap-4 border-b border-gray-50">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full transition">
+          <ArrowLeft size={20} className="text-slate-900" />
+        </button>
+        <span className="text-lg font-bold text-slate-900">Your cart</span>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+        {/* LEFT COLUMN: Items */}
+        <div className="lg:col-span-7 space-y-6">
+
+          {/* Savings Banner */}
+          <div className="flex items-center gap-3 bg-green-50 p-3 rounded-lg text-green-700 text-sm font-medium mb-6">
+            <TicketPercent size={18} className="fill-green-700 text-white" />
+            <span>Saving ₹6900 on this order</span>
+            {/* Mock text from screenshot */}
+          </div>
+
+          {/* Cart Items */}
+          <div className="space-y-8">
+            {cart.map((item) => (
+              <div key={item._id} className="flex justify-between items-start border-b border-gray-50 pb-6 last:border-0">
+                <div>
+                  <h3 className="font-medium text-slate-900 text-sm mb-1">{item.packageName}</h3>
+                  <p className="text-xs text-gray-500">Includes installation and demo</p>
+                  <p className="font-medium text-slate-900 text-sm mt-1">₹{item.priceAmount}</p>
+                </div>
+
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center border border-purple-100 rounded-lg bg-white overflow-hidden shadow-sm">
+                    <button
+                      onClick={() => dispatch(removeItemFromCart(item._id || item.id))}
+                      className="w-8 h-8 flex items-center justify-center text-[#6e42e5] hover:bg-purple-50"
+                    >
+                      <Minus size={14} strokeWidth={3} />
+                    </button>
+                    <span className="w-8 h-8 flex items-center justify-center text-sm font-bold text-[#6e42e5]">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => dispatch(addItemToCart(item))}
+                      className="w-8 h-8 flex items-center justify-center text-[#6e42e5] hover:bg-purple-50"
+                    >
+                      <Plus size={14} strokeWidth={3} />
+                    </button>
+                  </div>
+                  {/* Mock Original Price for visual if needed */}
+                  {/* <span className="text-xs text-gray-400 line-through">₹{item.priceAmount * 1.2}</span> */}
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
+        {/* RIGHT COLUMN: Summary & Tipping */}
+        <div className="lg:col-span-5 space-y-8">
+
+          {/* Payment Summary */}
+          <div className="space-y-4">
+            <h3 className="font-bold text-slate-900 text-lg">Payment summary</h3>
+
+            <div className="flex justify-between text-sm py-1">
+              <span className="text-slate-600">Item total</span>
+              <div className="flex gap-2">
+                <span className="text-gray-400 line-through text-xs mt-0.5">₹{cartTotal + 6400}</span>
+                <span className="font-bold text-slate-900">₹{cartTotal}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between text-sm py-1 border-b border-gray-100 pb-4">
+              <span className="text-slate-600">Free service offer</span>
+              <span className="text-emerald-500 font-medium">-₹{discount}</span>
+            </div>
+
+            <div className="flex justify-between text-sm font-bold py-1">
+              <span className="text-slate-900">Total amount</span>
+              <span className="text-slate-900">₹{cartTotal - discount}</span>
+            </div>
+
+            <div className="flex justify-between text-sm font-bold py-1">
+              <span className="text-slate-900">Amount to pay</span>
+              <span className="text-slate-900">₹{payAmount}</span>
+            </div>
+          </div>
+
+          {/* Coupons */}
+          <div className="py-4 border-t border-b border-gray-100 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition -mx-2 px-2 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center">
+                <TicketPercent size={14} className="text-white" />
+              </div>
+              <span className="text-sm font-medium text-slate-900">Coupons and offers</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#6e42e5] font-bold">3 offers</span>
+              <ChevronRight size={16} className="text-[#6e42e5]" />
+            </div>
+          </div>
+
+          {/* Tipping Section */}
+          <div>
+            <h3 className="font-bold text-slate-900 text-base mb-4">Add a tip to thank the Professional</h3>
+            <div className="flex gap-3 mb-2">
+              {[50, 75, 100].map(amt => (
+                <button
+                  key={amt}
+                  onClick={() => handleTipSelection(amt)}
+                  className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${tip === amt && !isCustomTip
+                      ? 'bg-white border-green-500 shadow-sm relative overflow-hidden'
+                      : 'bg-white border-gray-200 hover:border-gray-300'
+                    }`}
+                >
+                  {tip === amt && !isCustomTip && <div className="absolute top-0 right-0 w-2 h-2 bg-green-500 rounded-bl" />}
+                  ₹{amt}
+                  {amt === 75 && <span className="block text-[8px] font-bold text-green-600 uppercase tracking-wide -mt-0.5">Popular</span>}
+                </button>
+              ))}
+              <button
+                onClick={() => { setIsCustomTip(true); setTip(0); setCustomTip(''); }}
+                className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${isCustomTip
+                    ? 'bg-white border-green-500 shadow-sm'
+                    : 'bg-white border-gray-200 hover:border-gray-300'
+                  }`}
+              >
+                Custom
+              </button>
+            </div>
+
+            {isCustomTip && (
+              <input
+                type="text"
+                placeholder="Enter amount"
+                value={customTip}
+                onChange={handleCustomTipChange}
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm mt-2 focus:border-green-500 outline-none"
+              />
+            )}
+
+            <p className="text-xs text-gray-400 mt-3">100% of the tip goes to the professional.</p>
+          </div>
+
         </div>
       </div>
 
-      <main className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Items List */}
-        <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Selected Services</h2>
-          {cart.map((item) => (
-            <div key={item._id} className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm flex items-center gap-5">
-              <img
-                src={item.packageImage?.startsWith('http') ? item.packageImage : `${BACKEND_URL}/${item.packageImage}`}
-                alt={item.packageName}
-                className="w-20 h-20 rounded-2xl object-cover border border-gray-50"
-              />
-              <div className="flex-1">
-                <h3 className="font-bold text-slate-900 leading-tight">{item.packageName}</h3>
-                <p className="text-blue-600 font-black mt-1 text-lg">₹{item.priceAmount}</p>
-              </div>
-
-              <div className="flex flex-col items-end gap-3">
-                <button
-                  onClick={() => dispatch(removeItemFromCart(item._id || item.id))}
-                  className="p-2 text-gray-300 hover:text-red-500 transition"
-                >
-                  <Trash2 size={18} />
-                </button>
-                <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-3">
-                  <span className="px-3 font-black text-sm">{item.quantity}</span>
-                </div>
-              </div>
+      {/* FIXED BOTTOM FOOTER */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 shadow-[0_-4px_16px_rgba(0,0,0,0.05)] z-50">
+        <div className="max-w-6xl mx-auto flex flex-col gap-3">
+          {/* Address Bar */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <Home size={16} className="text-slate-900 shrink-0" />
+              <span className="text-xs font-medium text-slate-700 truncate">
+                {userAddress}
+              </span>
             </div>
-          ))}
-
-          {/* Service Guarantee Card */}
-          <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 flex items-start gap-4">
-            <div className="p-2 bg-white rounded-xl text-emerald-600 shadow-sm">
-              <ShieldCheck size={24} />
-            </div>
-            <div>
-              <h4 className="font-bold text-emerald-900 text-sm italic">GharKeSeva Protection</h4>
-              <p className="text-emerald-700 text-xs mt-1 leading-relaxed">Every service includes 30 days warranty and background verified experts.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Payment Summary */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl sticky top-28">
-            <h3 className="text-lg font-black text-slate-900 mb-6 italic">BILLING DETAILS</h3>
-
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Item Total</span>
-                <span className="font-bold text-slate-800">₹{cartTotal}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Convenience Fee</span>
-                <span className="text-emerald-600 font-bold">FREE</span>
-              </div>
-              <div className="h-px bg-dashed bg-gray-100 my-4 border-t-2 border-dashed"></div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-900 font-black text-lg italic">TO PAY</span>
-                <span className="text-2xl font-black text-slate-900">₹{cartTotal}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => navigate('/checkout')} // Agla step: Payment/Address page
-              className="w-full py-5 bg-blue-600 text-white rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
-            >
-              Proceed to Checkout <Zap size={16} fill="white" />
+            <button className="text-slate-400 hover:text-slate-900">
+              <Edit2 size={14} />
             </button>
-
-            <div className="mt-6 flex items-center justify-center gap-2 opacity-30 grayscale">
-              <CreditCard size={16} />
-              <span className="text-[10px] font-black uppercase tracking-tighter">Secure 256-bit SSL Payment</span>
-            </div>
           </div>
+
+          {/* Action Button */}
+          <button
+            onClick={() => navigate('/checkout')}
+            className="w-full bg-[#6e42e5] hover:bg-[#5b36bf] text-white font-bold py-3 rounded-xl transition shadow-lg shadow-purple-100"
+          >
+            Select slots
+          </button>
         </div>
-      </main>
+      </div>
+
     </div>
   );
 };

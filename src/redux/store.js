@@ -7,12 +7,14 @@ import authReducer from './slices/authSlice';
 import cartReducer from './slices/cartSlice';
 import bookingReducer from './slices/bookingSlice';
 import serviceReducer from './slices/serviceSlice';
+import marketingReducer from './slices/marketingSlice';
 
 const rootReducer = combineReducers({
     auth: authReducer,
     cart: cartReducer,
     bookings: bookingReducer,
     services: serviceReducer,
+    marketing: marketingReducer,
 });
 
 const persistConfig = {
