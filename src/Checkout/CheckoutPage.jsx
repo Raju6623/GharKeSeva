@@ -11,6 +11,8 @@ import { handleRazorpayPayment } from '../PaymentSection/RazorpayPayment';
 import { BASE_URL } from '../config';
 import toast from 'react-hot-toast';
 import useTranslation from '../hooks/useTranslation';
+import { calculateGSCoin } from '../utils/coinUtils';
+import { Coins } from 'lucide-react';
 
 const socket = io(BASE_URL);
 
@@ -297,6 +299,14 @@ function CheckoutPage() {
                 <div className="flex justify-between items-center text-[#0c8182]">
                   <span className="font-black text-xs uppercase tracking-widest italic">{t('total_payable')}</span>
                   <span className="text-3xl font-black tracking-tighter">₹{cartTotal}</span>
+                </div>
+
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-center justify-between mt-4">
+                  <div className="flex items-center gap-2">
+                    <Coins size={16} className="text-amber-500" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">{t('you_will_earn')}</span>
+                  </div>
+                  <span className="text-sm font-black text-amber-500">{calculateGSCoin(cartTotal)} {t('gs_coins')}</span>
                 </div>
               </div>
             </div>

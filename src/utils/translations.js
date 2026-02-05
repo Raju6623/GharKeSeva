@@ -215,6 +215,9 @@ export const translations = {
         view_details: "View details",
         add: "Add",
         customizable: "Customizable",
+        earn: "Earn",
+        gs_coins: "GS Coins",
+        you_will_earn: "You will earn",
 
         // Hero & Banners
         summer_festival: "Summer Cooling Festival",
@@ -1506,5 +1509,8 @@ export const translations = {
         hours: "घंटे",
         per_service: "प्रति सेवा",
         new_service: "नई सेवा",
+        earn: "कमाएं",
+        gs_coins: "GS सिक्के",
+        you_will_earn: "आप कमाएंगे",
     }
 };

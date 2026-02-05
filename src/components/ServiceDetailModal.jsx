@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Star, Check, Info } from 'lucide-react';
+import { X, Star, Check, Info, Coins } from 'lucide-react';
+import { calculateGSCoin } from '../utils/coinUtils';
 import { useDispatch, useSelector } from 'react-redux';
 import { addItemToCart, removeItemFromCart } from '../redux/thunks/cartThunks';
 import useTranslation from '../hooks/useTranslation';
@@ -74,7 +75,12 @@ function ServiceDetailModal({ isOpen, onClose, service }) {
                 </div>
 
                 <div className="flex items-center justify-between mt-auto">
-                    <div className="font-black text-slate-900 text-lg">₹{variant.price}</div>
+                    <div className="flex flex-col gap-0.5">
+                        <div className="font-black text-slate-900 text-lg">₹{variant.price}</div>
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                            <Coins size={10} /> {t('earn')} {calculateGSCoin(variant.price)} {t('gs_coins')}
+                        </div>
+                    </div>
 
                     {isAdded ? (
                         <button

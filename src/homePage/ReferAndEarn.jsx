@@ -2,10 +2,28 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Coins, Ticket, Wallet, Zap, Copy, Share2, ChevronRight, Gamepad2, Gift } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { fetchBookings } from '../redux/thunks/bookingThunks';
+import { calculateGSCoin } from '../utils/coinUtils';
 
 const ReferAndEarn = () => {
+    const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
+    const { list: bookings } = useSelector((state) => state.bookings);
     const [referralCode] = useState(user?.referralCode || `GS${(user?.name || 'USER').toUpperCase().slice(0, 3)}${Math.floor(1000 + Math.random() * 9000)}`);
+
+    React.useEffect(() => {
+        dispatch(fetchBookings());
+    }, [dispatch]);
+
+    // Calculate GS Coins from bookings (1 Coin per ₹25)
+    // Only count Paid bookings or Completed ones
+    const totalEarningsFromBookings = bookings.reduce((acc, curr) => {
+        if (curr.paymentStatus === 'Paid' || curr.bookingStatus === 'Completed') {
+            return acc + calculateGSCoin(curr.totalPrice);
+        }
+        return acc;
+    }, 0);
 
     const copyCode = () => {
         navigator.clipboard.writeText(referralCode);
@@ -28,7 +46,7 @@ const ReferAndEarn = () => {
         { label: "Refer Coins", value: user?.referCoins || 0, icon: <Coins className="text-amber-600" size={20} />, bg: "bg-amber-50", text: "text-amber-700" },
         { label: "Coupons", value: user?.couponsCount || 0, icon: <Ticket className="text-indigo-600" size={20} />, bg: "bg-indigo-50", text: "text-indigo-700" },
         { label: "Wallet", value: `₹${user?.walletBalance || 0}`, icon: <Wallet className="text-emerald-600" size={20} />, bg: "bg-emerald-50", text: "text-emerald-700" },
-        { label: "GS Coins", value: user?.gsCoins || 0, icon: <Zap className="text-amber-500" size={20} />, bg: "bg-amber-100", text: "text-amber-800" },
+        { label: "GS Coins", value: totalEarningsFromBookings, icon: <Zap className="text-amber-500" size={20} />, bg: "bg-amber-100", text: "text-amber-800" },
     ];
 
     return (

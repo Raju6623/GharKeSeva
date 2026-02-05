@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { API_URL, getImageUrl } from '../config';
-import { Search, MapPin, User, ChevronDown, ShoppingBag, Menu, Loader2, Globe, X, Scissors, Wind, Droplets, Zap, Wrench, Paintbrush, Home, Star, Calendar, MessageSquare, Wallet, Megaphone, Briefcase, BookOpen, ChevronRight, LogOut, Phone, Share2, Info, ShieldCheck, FileText, Bell, ClipboardList } from 'lucide-react';
+import { Search, MapPin, User, ChevronDown, ShoppingBag, Menu, Loader2, Globe, X, Scissors, Wind, Droplets, Zap, Wrench, Paintbrush, Home, Star, Calendar, MessageSquare, Wallet, Megaphone, Briefcase, BookOpen, ChevronRight, LogOut, Phone, Share2, Info, ShieldCheck, FileText, Bell, ClipboardList, Mic } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLocation } from '../redux/slices/locationSlice';
 import { setLanguage } from '../redux/slices/authSlice';
@@ -56,7 +56,49 @@ function TopBar() {
   const [membershipPlans, setMembershipPlans] = useState([]);
   const [recentBookings, setRecentBookings] = useState([]);
   const [isMembershipLoading, setIsMembershipLoading] = useState(true);
+  const [isListening, setIsListening] = useState(false);
   const scrollContainerRef = useRef(null);
+
+  const startVoiceSearch = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Voice search is not supported in your browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = language === 'Hindi' ? 'hi-IN' : 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setSearchQuery(transcript);
+      setIsListening(false);
+      navigate(`/services?q=${transcript}`);
+      toast.success(`Searching for: ${transcript}`);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Voice search error:", event.error);
+      setIsListening(false);
+      if (event.error === 'not-allowed') {
+        toast.error("Microphone access denied.");
+      } else {
+        toast.error("Could not recognize voice. Try again.");
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
 
   useEffect(() => {
     if (membershipPlans.length <= 1) return;
@@ -420,15 +462,26 @@ function TopBar() {
                 placeholder={t('searchPlaceholder')}
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 lg:py-3 pl-11 pr-10 focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] outline-none transition-all shadow-sm font-semibold text-slate-700 placeholder:text-slate-400"
               />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => { setSearchQuery(""); setSuggestions([]); setShowSuggestions(false); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <div className="bg-gray-200 rounded-full p-0.5"><X size={14} /></div>
-                </button>
-              )}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => { setSearchQuery(""); setSuggestions([]); setShowSuggestions(false); }}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <div className="bg-gray-100 rounded-full p-1"><X size={14} /></div>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={startVoiceSearch}
+                    className={`p-2 rounded-full transition-all ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                    title="Voice Search"
+                  >
+                    <Mic size={16} />
+                  </button>
+                )}
+              </div>
 
               {showSuggestions && (
                 <div className="absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[110] max-h-[500px] overflow-y-auto [&::-webkit-scrollbar]:hidden">

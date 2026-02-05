@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
-import { ArrowRight, ArrowLeft, Star } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Star, Coins } from 'lucide-react';
+import { calculateGSCoin } from '../utils/coinUtils';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getServiceRoute } from '../utils/routeUtils';
@@ -42,8 +43,13 @@ function TrendingServices() {
                 <h3 className="font-bold text-[15px] text-slate-800 leading-tight mb-1 line-clamp-2">
                     {service.packageName}
                 </h3>
-                <div className="flex items-center gap-1 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                    <Star size={10} fill="#f59e0b" className="text-[#f59e0b]" /> 4.8
+                <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                        <Star size={10} fill="#f59e0b" className="text-[#f59e0b]" /> 4.8
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">
+                        <Coins size={10} /> {calculateGSCoin(service.priceAmount)}
+                    </div>
                 </div>
             </div>
 

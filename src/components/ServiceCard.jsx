@@ -7,6 +7,7 @@ import ServiceDetailModal from './ServiceDetailModal';
 import ReviewsModal from './ReviewsModal';
 import axios from 'axios';
 import useTranslation from '../hooks/useTranslation';
+import { calculateGSCoin } from '../utils/coinUtils';
 
 // Normalize category - map all AC variants to "AC"
 function normalizeCategory(cat) {
@@ -145,7 +146,7 @@ function ServiceCard({ service, categoryName, pageCategory }) {
 
                 {/* Coin Reward Message */}
                 <div className="mb-3 flex items-center gap-1.5 bg-amber-50 w-fit px-2 py-1 rounded text-[10px] font-bold text-amber-800 border border-amber-100">
-                    <Coins size={12} className="text-amber-500" /> Earn 20 GS Coins
+                    <Coins size={12} className="text-amber-500" /> {t('earn')} {calculateGSCoin(service.priceAmount)} {t('gs_coins')}
                 </div>
 
                 <button
