@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, MapPin, Clock, User, LogOut, Package,
     CreditCard, ShieldCheck, Mail, Phone, Home, Sparkles, CheckCircle2
@@ -26,7 +26,8 @@ function UserProfile() {
     const { t } = useTranslation();
     const { user } = useSelector((state) => state.auth);
     const { list: bookings, loading } = useSelector((state) => state.bookings);
-    const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'settings'
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'settings' | 'addresses'
     const [trackBooking, setTrackBooking] = useState(null);
     const [reviewBooking, setReviewBooking] = useState(null);
 
@@ -35,6 +36,14 @@ function UserProfile() {
             navigate('/login');
             return;
         }
+
+        // Sync tab from URL
+        const params = new URLSearchParams(location.search);
+        const tab = params.get('tab');
+        if (tab && ['orders', 'profile', 'settings', 'addresses'].includes(tab)) {
+            setActiveTab(tab);
+        }
+
         dispatch(fetchBookings());
 
         // Real-time updates
@@ -126,6 +135,7 @@ function UserProfile() {
                         {[
                             { id: 'orders', label: t('my_bookings'), icon: Package },
                             { id: 'profile', label: t('profile_details'), icon: User },
+                            { id: 'addresses', label: t('addresses') || 'Addresses', icon: MapPin },
                             { id: 'settings', label: t('privacy_settings'), icon: ShieldCheck },
                         ].map((item) => (
                             <button
@@ -309,8 +319,12 @@ function UserProfile() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    )}
 
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 mt-12">{t('service_address')}</h3>
+                    {activeTab === 'addresses' && (
+                        <div className="space-y-8 animate-in slide-in-from-right-2 fade-in duration-300">
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">{t('service_address')}</h3>
                             <div className="bg-white/70 backdrop-blur-xl p-8 rounded-3xl border border-slate-200/60 shadow-sm flex items-start gap-6">
                                 <div className="p-4 bg-[#effafa] border border-teal-100 rounded-2xl text-[#0c8182] shrink-0">
                                     <Home size={20} />

@@ -14,7 +14,7 @@ import 'swiper/css/pagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchBanners } from '../redux/thunks/marketingThunks';
 import { io } from 'socket.io-client';
-import { BASE_URL } from '../config';
+import { BASE_URL, getImageUrl } from '../config';
 
 const socket = io(BASE_URL);
 // ... existing imports
@@ -53,7 +53,7 @@ function PromotionalBanners() {
             >
                 {/* Image Background */}
                 <img
-                    src={banner.image}
+                    src={getImageUrl(banner.image)}
                     alt={banner.title}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />

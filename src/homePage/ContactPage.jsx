@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   Mail, Phone, MapPin, Send,
   MessageSquare, Clock, ShieldCheck, Globe
@@ -49,7 +50,43 @@ function ContactPage() {
     }
   ];
 
-  // ... (logic handlers same)
+  // --- 2. HANDLER LOGIC ---
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormState(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFormSubmission = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    console.log("Form Data Sent:", formState);
+    toast.success("Message Transmitted! We'll reply shortly.");
+
+    setFormState({
+      userName: '',
+      userEmail: '',
+      userPhone: '',
+      serviceType: 'General Inquiry',
+      userMessage: ''
+    });
+    setIsSubmitting(false);
+  };
+
+  const serviceOptions = [
+    'General Inquiry',
+    'Booking Issue',
+    'Partnership Request',
+    'Wallet/Payment Issue',
+    'Service Feedback',
+    'Other'
+  ].map((opt, i) => (
+    <option key={i} value={opt}>{opt}</option>
+  ));
 
   const contactCards = contactMethods.map((method) => (
     <a
@@ -70,7 +107,6 @@ function ContactPage() {
     </a>
   ));
 
-  // ... 
 
   return (
     <>

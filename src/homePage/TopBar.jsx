@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { API_URL, getImageUrl } from '../config';
-import { Search, MapPin, User, ChevronDown, ShoppingBag, Menu, Loader2, Globe, X, Scissors, Wind, Droplets, Zap, Wrench, Paintbrush, Home, Star, Calendar, MessageSquare, Wallet, Megaphone, Briefcase, BookOpen, ChevronRight, LogOut, Phone, Share2, Info, ShieldCheck, FileText, Bell } from 'lucide-react';
+import { Search, MapPin, User, ChevronDown, ShoppingBag, Menu, Loader2, Globe, X, Scissors, Wind, Droplets, Zap, Wrench, Paintbrush, Home, Star, Calendar, MessageSquare, Wallet, Megaphone, Briefcase, BookOpen, ChevronRight, LogOut, Phone, Share2, Info, ShieldCheck, FileText, Bell, ClipboardList } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLocation } from '../redux/slices/locationSlice';
 import { setLanguage } from '../redux/slices/authSlice';
@@ -54,6 +54,7 @@ function TopBar() {
   const mobileBoxRef = useRef(null);
 
   const [membershipPlans, setMembershipPlans] = useState([]);
+  const [recentBookings, setRecentBookings] = useState([]);
   const [isMembershipLoading, setIsMembershipLoading] = useState(true);
   const scrollContainerRef = useRef(null);
 
@@ -83,18 +84,43 @@ function TopBar() {
         const data = await response.json();
         // Assuming data is an array since sendResponse sends it directly
         if (Array.isArray(data)) {
-          setMembershipPlans(data.filter(p => p.isActive));
+          const plans = data.filter(p => p.isActive);
+          setMembershipPlans([
+            ...plans,
+            { isReferral: true, title: 'Refer & Earn', subtitle: 'Earn Free Services', color: '#7c3aed' }
+          ]);
         } else if (data && Array.isArray(data.data)) {
-          setMembershipPlans(data.data.filter(p => p.isActive));
+          const plans = data.data.filter(p => p.isActive);
+          setMembershipPlans([
+            ...plans,
+            { isReferral: true, title: 'Refer & Earn', subtitle: 'Earn Free Services', color: '#7c3aed' }
+          ]);
         }
       } catch (err) {
         console.error("Error fetching membership plans:", err);
+        setMembershipPlans([{ isReferral: true, title: 'Refer & Earn', subtitle: 'Earn Free Services', color: '#7c3aed' }]);
       } finally {
         setIsMembershipLoading(false);
       }
     };
     fetchMembership();
   }, []);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (!user?._id) return;
+      try {
+        const response = await fetch(`${API_URL}/bookings/user/${user._id}`);
+        const data = await response.json();
+        if (data.success) {
+          setRecentBookings(data.bookings || []);
+        }
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+      }
+    };
+    fetchBookings();
+  }, [user]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -624,9 +650,9 @@ function TopBar() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   // If user is not logged in, these links might redirect to login. Assuming protected routes handle that or user logs in.
-                  { label: t('bookings') || "My Bookings", icon: Calendar, link: "/bookings" },
+                  { label: t('bookings') || "My Bookings", icon: Calendar, link: "/my-bookings" },
                   { label: t('addresses') || "Addresses", icon: MapPin, link: "/profile?tab=addresses" },
-                  { label: t('help') || "Help Center", icon: MessageSquare, link: "/help" }
+                  { label: t('help') || "Help Center", icon: MessageSquare, link: "/contact" }
                 ].map((item, i) => (
                   <Link
                     key={i}
@@ -787,8 +813,9 @@ function TopBar() {
             </div>
           </div>
         </div>
-      )}
-    </header>
+      )
+      }
+    </header >
   );
 }
 
