@@ -57,7 +57,9 @@ function TopBar() {
   const [recentBookings, setRecentBookings] = useState([]);
   const [isMembershipLoading, setIsMembershipLoading] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const scrollContainerRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   const startVoiceSearch = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -279,6 +281,9 @@ function TopBar() {
       if (languageRef.current && !languageRef.current.contains(event.target)) {
         setIsLanguageOpen(false);
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
       if (!event.target.closest('.search-container')) {
         setShowSuggestions(false);
       }
@@ -398,6 +403,88 @@ function TopBar() {
           </div>
         </div>
       )}
+    </div>
+  );
+
+  const renderUserDropdown = () => (
+    <div
+      ref={userMenuRef}
+      className="absolute top-full right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-[110] animate-in fade-in slide-in-from-top-4 duration-300 shadow-teal-900/10"
+    >
+      {/* Header Profile Info */}
+      <div className="bg-slate-900 p-6 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center font-black text-xl text-white">
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-black text-lg truncate tracking-tight uppercase italic">{user?.name || "Guest User"}</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{user?.phone || user?.email || "GharKeSeva User"}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Stats/Links */}
+      <div className="p-2 space-y-1">
+        <div className="grid grid-cols-2 gap-2 p-2">
+          <Link
+            to="/refer"
+            onClick={() => setIsUserMenuOpen(false)}
+            className="flex flex-col items-center justify-center p-4 bg-amber-50 border border-amber-100 rounded-2xl hover:bg-amber-100 transition-all group"
+          >
+            <Zap size={20} className="text-amber-500 mb-2 group-hover:scale-110 transition-transform" />
+            <span className="text-[10px] font-black uppercase text-amber-700 tracking-widest">Refer & Earn</span>
+          </Link>
+          <Link
+            to="/wallet"
+            onClick={() => setIsUserMenuOpen(false)}
+            className="flex flex-col items-center justify-center p-4 bg-emerald-50 border border-emerald-100 rounded-2xl hover:bg-emerald-100 transition-all group"
+          >
+            <Wallet size={20} className="text-emerald-500 mb-2 group-hover:scale-110 transition-transform" />
+            <span className="text-[10px] font-black uppercase text-emerald-700 tracking-widest tracking-widest">GKS Wallet</span>
+          </Link>
+        </div>
+
+        <div className="h-px bg-slate-100 mx-4 my-2"></div>
+
+        <Link to="/my-bookings" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 transition-colors group">
+          <ClipboardList size={18} className="text-slate-400 group-hover:text-[#0c8182]" />
+          <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">{t('bookings')}</span>
+          <ChevronRight size={14} className="ml-auto text-slate-300" />
+        </Link>
+
+        <Link to="/profile?tab=addresses" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 transition-colors group">
+          <MapPin size={18} className="text-slate-400 group-hover:text-[#0c8182]" />
+          <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">Saved Addresses</span>
+          <ChevronRight size={14} className="ml-auto text-slate-300" />
+        </Link>
+
+        <Link to="/blog" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 transition-colors group">
+          <BookOpen size={18} className="text-slate-400 group-hover:text-[#0c8182]" />
+          <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">Read Blog</span>
+          <ChevronRight size={14} className="ml-auto text-slate-300" />
+        </Link>
+
+        <Link to="/contact" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 transition-colors group">
+          <MessageSquare size={18} className="text-slate-400 group-hover:text-[#0c8182]" />
+          <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">Help & Support</span>
+          <ChevronRight size={14} className="ml-auto text-slate-300" />
+        </Link>
+      </div>
+
+      {/* Logout Footer */}
+      <div className="p-2 border-t border-slate-50 bg-slate-50/50">
+        <button
+          onClick={() => {
+            setIsUserMenuOpen(false);
+            window.location.href = '/login';
+          }}
+          className="w-full h-12 flex items-center justify-center gap-2 text-red-500 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-50 rounded-xl transition-colors"
+        >
+          <LogOut size={16} /> Logout Account
+        </button>
+      </div>
     </div>
   );
 
@@ -589,15 +676,21 @@ function TopBar() {
             </Link>
 
             {user ? (
-              <Link to="/profile" className="flex items-center justify-center w-11 h-11 bg-[#0c8182] text-white rounded-full hover:bg-[#0a6d6d] transition-all active:scale-95 shadow-lg shadow-teal-200/50 overflow-hidden" title={t('profile')}>
-                {user.image || user.photo ? (
-                  <img src={getImageUrl(user.image || user.photo)} alt={user.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-lg font-black uppercase tracking-tight">
-                    {user.name ? user.name.charAt(0) : <User size={22} />}
-                  </span>
-                )}
-              </Link>
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center justify-center w-11 h-11 bg-[#0c8182] text-white rounded-full hover:bg-[#0a6d6d] transition-all active:scale-95 shadow-lg shadow-teal-200/50 overflow-hidden cursor-pointer"
+                >
+                  {user.image || user.photo ? (
+                    <img src={getImageUrl(user.image || user.photo)} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-lg font-black uppercase tracking-tight">
+                      {user.name ? user.name.charAt(0) : <User size={22} />}
+                    </span>
+                  )}
+                </button>
+                {isUserMenuOpen && renderUserDropdown()}
+              </div>
             ) : (
               <Link to="/login" className="flex items-center space-x-2 bg-[#0c8182] text-white px-5 py-2.5 rounded-xl hover:bg-[#0a6d6d] transition-all active:scale-95 shadow-lg shadow-teal-200">
                 <User size={20} />

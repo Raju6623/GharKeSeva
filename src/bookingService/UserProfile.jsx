@@ -134,13 +134,15 @@ function UserProfile() {
                     <nav className="bg-white/40 backdrop-blur-xl rounded-2xl border border-slate-200/50 shadow-sm overflow-hidden p-1.5 space-y-1">
                         {[
                             { id: 'orders', label: t('my_bookings'), icon: Package },
+                            { id: 'refer', label: 'Refer & Earn', icon: Megaphone, link: '/refer' },
+                            { id: 'wallet', label: 'GKS Wallet', icon: Wallet, link: '/wallet' },
                             { id: 'profile', label: t('profile_details'), icon: User },
                             { id: 'addresses', label: t('addresses') || 'Addresses', icon: MapPin },
                             { id: 'settings', label: t('privacy_settings'), icon: ShieldCheck },
                         ].map((item) => (
                             <button
                                 key={item.id}
-                                onClick={() => setActiveTab(item.id)}
+                                onClick={() => item.link ? navigate(item.link) : setActiveTab(item.id)}
                                 className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-xs transition-all duration-300 ${activeTab === item.id
                                     ? 'bg-slate-900 text-white shadow-md'
                                     : 'text-slate-500 hover:bg-white hover:text-slate-900'
