@@ -3,8 +3,9 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
   Trash2, Plus, Minus, ShoppingBag, ArrowLeft,
   ChevronRight, CreditCard, ShieldCheck, Zap,
-  Home, Edit2, TicketPercent, X
+  Home, Edit2, TicketPercent, X, Coins
 } from 'lucide-react';
+import { calculateGSCoin } from '../utils/coinUtils';
 import { useSelector, useDispatch } from 'react-redux';
 import { addItemToCart, removeItemFromCart } from '../redux/thunks/cartThunks';
 import { fetchCoupons } from '../redux/thunks/marketingThunks';
@@ -381,6 +382,15 @@ function ServiceBasket() {
             <div className="flex justify-between text-sm font-bold py-1">
               <span className="text-slate-900">{t('amount_to_pay')}</span>
               <span className="text-slate-900">₹{payAmount}</span>
+            </div>
+
+            {/* GS Coins Reward */}
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-center justify-between mt-4">
+              <div className="flex items-center gap-2">
+                <Coins size={16} className="text-amber-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-amber-600">{t('you_will_earn')}</span>
+              </div>
+              <span className="text-sm font-black text-amber-600">{calculateGSCoin(payAmount)} {t('gs_coins')}</span>
             </div>
           </div>
 
