@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { loginUser } from '../thunks/authThunks';
+import { loginUser, refreshUserProfile } from '../thunks/authThunks';
 
 const initialState = {
     user: JSON.parse(localStorage.getItem('user')) || null,
@@ -45,6 +45,10 @@ const authSlice = createSlice({
                 if (action.payload.language) {
                     state.language = action.payload.language;
                 }
+            })
+            .addCase(refreshUserProfile.fulfilled, (state, action) => {
+                state.user = { ...state.user, ...action.payload };
+                state.loading = false;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;

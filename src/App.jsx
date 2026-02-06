@@ -61,6 +61,14 @@ function App() {
 
   useEffect(() => {
     dispatch(fetchCartItems());
+
+    // --- REFFERAL TRACKING ---
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) {
+      localStorage.setItem('pendingReferral', ref);
+      console.log("🎁 Referral code captured and persisted:", ref);
+    }
   }, [dispatch]);
 
   useEffect(() => {

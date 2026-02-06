@@ -149,15 +149,6 @@ function GharKeSevaHero() {
         <section className="bg-white pt-24 pb-16 relative overflow-hidden font-sans">
             <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-                {/* Local Targeting Banner */}
-                <div className="mb-8 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl border border-red-100 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
-                    <div className="bg-red-100 p-2 rounded-full text-red-600 animate-pulse"><MapPin size={20} /></div>
-                    <div>
-                        <h3 className="font-black text-red-900 text-sm uppercase tracking-wider">Patna Benefit</h3>
-                        <p className="text-xs text-red-700 font-medium">Residents of <span className="font-bold underline">Patna</span> get <span className="font-black">15% EXTRA OFF</span> on Sunday bookings! 🎟️ Use Code: <span className="bg-white px-1 py-0.5 rounded border border-red-200 font-mono text-red-600">PATNA15</span></p>
-                    </div>
-                </div>
-
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start relative z-10">
                     {/* Left Side: Service Grid */}
                     <div className="bg-white rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.06)] border border-slate-100 p-8 py-10 relative">

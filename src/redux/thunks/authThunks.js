@@ -40,3 +40,22 @@ export const registerUser = createAsyncThunk(
     }
   }
 );
+// Async Thunk to Refresh User Profile (Coins/Wallet)
+export const refreshUserProfile = createAsyncThunk(
+  'auth/refreshProfile',
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/user/profile/${userId}`);
+      if (response.data.success) {
+        // Update local storage too so it persists on refresh
+        const existingUser = JSON.parse(localStorage.getItem('user')) || {};
+        const updatedUser = { ...existingUser, ...response.data };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return response.data;
+      }
+      return rejectWithValue('Failed to refresh profile');
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);

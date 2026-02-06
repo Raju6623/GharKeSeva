@@ -1,22 +1,43 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Home, Calendar, Clock, Coins } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { calculateGSCoin } from '../utils/coinUtils';
+
+import useTranslation from '../hooks/useTranslation';
 
 function BookingSuccess() {
+    const { t } = useTranslation();
+    const { currentBooking, lastCreatedBookings, list } = useSelector((state) => state.bookings);
+
+    // Calculate total coins from the entire batch of bookings just created
+    const earnedCoins = React.useMemo(() => {
+        if (lastCreatedBookings && lastCreatedBookings.length > 0) {
+            return lastCreatedBookings.reduce((sum, b) => sum + calculateGSCoin(b.totalPrice), 0);
+        }
+        // Fallback: If no lastCreatedBookings, try currentBooking
+        if (currentBooking) return calculateGSCoin(currentBooking.totalPrice);
+        // Second Fallback: Use the most recent booking from the list
+        if (list && list.length > 0) return calculateGSCoin(list[list.length - 1].totalPrice);
+        return 0;
+    }, [lastCreatedBookings, currentBooking, list]);
+
     return (
         <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
             <div className="bg-green-50 p-6 rounded-full mb-6 animate-bounce">
                 <CheckCircle2 size={64} className="text-green-600" />
             </div>
 
-            <h1 className="text-3xl font-black text-slate-900 mb-2 text-center">Booking Confirmed!</h1>
+            <h1 className="text-3xl font-black text-slate-900 mb-2 text-center">{t('booking_confirmed')}</h1>
             <p className="text-gray-500 font-medium mb-4 text-center max-w-sm">
-                Your service request has been placed successfully. A professional will be assigned shortly.
+                {t('professional_reach_soon')}
             </p>
 
-            <div className="mb-8 bg-amber-50 text-amber-800 px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 animate-pulse border border-amber-200 shadow-sm">
-                <Coins size={14} className="text-amber-500" /> You earned <span className="text-amber-600 text-sm font-black">20 GS Coins</span> with this booking!
-            </div>
+            {earnedCoins > 0 && (
+                <div className="mb-8 bg-amber-50 text-amber-800 px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 animate-pulse border border-amber-200 shadow-sm">
+                    <Coins size={14} className="text-amber-500" /> {t('you_earned')} <span className="text-amber-600 text-sm font-black">{earnedCoins} {t('gs_coins')}</span> {t('with_this_booking')}
+                </div>
+            )}
 
             <div className="bg-gray-50 rounded-2xl p-6 w-full max-w-md border border-gray-100 mb-8">
                 <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">What happens next?</h3>

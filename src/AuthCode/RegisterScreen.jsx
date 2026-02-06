@@ -13,6 +13,18 @@ function RegisterScreen() {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
+  React.useEffect(() => {
+    const pendingRef = localStorage.getItem('pendingReferral');
+    if (pendingRef) {
+      setFormData(prev => ({ ...prev, referralCode: pendingRef }));
+    }
+  }, []);
+
+  // Simple Device Fingerprint (Screen + Browser Info)
+  const getFingerprint = () => {
+    return `${navigator.userAgent}-${window.screen.width}x${window.screen.height}-${navigator.language}`;
+  };
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -89,6 +101,7 @@ function RegisterScreen() {
       pincode: formData.pincode,
       termsAccepted: formData.termsAccepted,
       referralCode: formData.referralCode,
+      fingerprint: getFingerprint(),
       address: `${formData.houseNumber}, ${formData.area}, ${formData.landmark}, ${formData.city} - ${formData.pincode}`
     };
 
@@ -97,6 +110,8 @@ function RegisterScreen() {
 
       if (registerUser.fulfilled.match(resultAction)) {
         toast.success(t('account_created'));
+        // Clear pending referral after success
+        localStorage.removeItem('pendingReferral');
         navigate('/login');
       } else {
         toast.error(resultAction.payload || t('reg_failed'));

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { ArrowLeft, MapPin, Calendar, Clock, ShieldCheck, Loader2, CheckCircle2, Zap, Home, Sparkles } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, ShieldCheck, Loader2, CheckCircle2, Zap, Home, Sparkles, Wallet } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearCart } from '../redux/slices/cartSlice';
 import { createNewBooking } from '../redux/thunks/bookingThunks';
 import { createRazorpayOrder } from '../redux/thunks/paymentThunks';
+import { refreshUserProfile } from '../thunks/authThunks';
 import { handleRazorpayPayment } from '../PaymentSection/RazorpayPayment';
 import { BASE_URL } from '../config';
 import toast from 'react-hot-toast';
@@ -37,6 +38,12 @@ function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("COD");
 
   const handleClearCart = () => dispatch(clearCart());
+
+  React.useEffect(() => {
+    if (user?.id) {
+      dispatch(refreshUserProfile(user.id));
+    }
+  }, [dispatch, user?.id]);
 
   const saveBookingToDB = async (transactionId = "COD") => {
     try {
@@ -77,6 +84,7 @@ function CheckoutPage() {
         // socket.emit('new_booking_alert', { message: "New Booking Received!" }); // Backend handles this now
         setOrderSuccess(true);
         handleClearCart();
+        if (user?.id) dispatch(refreshUserProfile(user.id));
         setTimeout(() => { navigate("/"); }, 3000);
       } else {
         toast.error("Booking failed: " + resultAction.payload);
@@ -262,6 +270,22 @@ function CheckoutPage() {
                 <input type="radio" name="pay" checked={paymentMethod === 'RAZORPAY'} onChange={() => setPaymentMethod('RAZORPAY')} className="hidden" />
                 {paymentMethod === 'RAZORPAY' && <CheckCircle2 size={18} className="text-[#0c8182]" />}
               </label>
+
+              <label className={`flex items-center justify-between p-5 rounded-2xl border transition-all cursor-pointer ${paymentMethod === 'WALLET' ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-600 hover:border-slate-300'} ${user?.walletBalance < cartTotal ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                <div className="flex flex-col">
+                  <span className="font-black text-xs uppercase tracking-widest leading-none flex items-center gap-2">GS Wallet <Wallet size={12} className="text-[#0c8182]" /></span>
+                  <span className={`text-[9px] font-bold mt-1 ${paymentMethod === 'WALLET' ? 'text-white/60' : 'text-slate-400'}`}>Balance: ₹{user?.walletBalance || 0}</span>
+                </div>
+                <input
+                  type="radio"
+                  name="pay"
+                  disabled={user?.walletBalance < cartTotal}
+                  checked={paymentMethod === 'WALLET'}
+                  onChange={() => setPaymentMethod('WALLET')}
+                  className="hidden"
+                />
+                {paymentMethod === 'WALLET' && <CheckCircle2 size={18} className="text-[#0c8182]" />}
+              </label>
             </div>
           </section>
 
@@ -318,7 +342,7 @@ function CheckoutPage() {
             >
               {loading ? <Loader2 className="animate-spin" size={18} /> : (
                 <>
-                  {paymentMethod === 'COD' ? t('confirm_booking') : t('pay_book_now')}
+                  {paymentMethod === 'COD' ? t('confirm_booking') : (paymentMethod === 'WALLET' ? 'Pay with Wallet' : t('pay_book_now'))}
                   <Zap size={14} className="fill-white group-hover:animate-pulse" />
                 </>
               )}

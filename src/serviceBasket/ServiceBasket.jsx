@@ -384,7 +384,7 @@ function ServiceBasket() {
               <span className="text-slate-900">₹{payAmount}</span>
             </div>
 
-            {/* GS Coins Reward */}
+            {/* Coins Reward */}
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-center justify-between mt-4">
               <div className="flex items-center gap-2">
                 <Coins size={16} className="text-amber-500" />

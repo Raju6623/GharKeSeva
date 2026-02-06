@@ -439,6 +439,7 @@ function AddressSelection() {
                 totalPrice: finalTotal,
                 paymentId: paymentId,
                 paymentStatus: 'Paid',
+                paymentMethod: 'ONLINE',
                 bookingDate: date,
                 bookingStartTime: time,
                 bookingStatus: 'Pending'
@@ -481,6 +482,7 @@ function AddressSelection() {
           totalPrice: finalTotal,
           paymentId: "COD",
           paymentStatus: 'Pending',
+          paymentMethod: 'CASH',
           bookingDate: date,
           bookingStartTime: time,
           bookingStatus: 'Pending'
@@ -785,6 +787,15 @@ function AddressSelection() {
                   </tr>
                 </tfoot>
               </table>
+
+              {/* Coins Reward */}
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-center justify-between mt-4">
+                <div className="flex items-center gap-2">
+                  <Coins size={16} className="text-amber-500" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-600">{t('you_will_earn')}</span>
+                </div>
+                <span className="text-sm font-black text-amber-600">{calculateGSCoin(finalTotal)} {t('gs_coins')}</span>
+              </div>
             </div>
 
             <button
