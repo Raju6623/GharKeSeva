@@ -57,7 +57,7 @@ function MyBookings() {
                 <div>
                   <h3 className="font-black text-lg text-slate-800">{order.packageName}</h3>
                   <span className="text-xs font-bold bg-blue-50 text-blue-600 px-3 py-1 rounded-full mt-2 inline-block">
-                    ID: {order.customBookingId}
+                    Order ID: {order.customBookingId}
                   </span>
                 </div>
                 <div className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider ${order.bookingStatus === 'Completed' ? 'bg-green-100 text-green-700' :

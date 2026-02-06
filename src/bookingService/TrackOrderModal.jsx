@@ -29,6 +29,8 @@ function TrackOrderModal({ booking, onClose }) {
     const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
 
     const [unreadCount, setUnreadCount] = useState(booking.unreadCount || 0);
+    const [currentStatus, setCurrentStatus] = useState(booking.bookingStatus || 'Pending');
+    const [isCompleted, setIsCompleted] = useState(booking.bookingStatus === 'Completed');
 
     // Refresh booking data on mount to get latest messages and unread count
     useEffect(() => {
@@ -72,10 +74,21 @@ function TrackOrderModal({ booking, onClose }) {
                     setUnreadCount(prev => prev + 1);
                 }
             };
+            const handleStatusUpdate = (data) => {
+                if (data.bookingId === booking.customBookingId) {
+                    setCurrentStatus(data.status);
+                    if (data.status === 'Completed') {
+                        setIsCompleted(true);
+                    }
+                }
+            };
+
             socket.on('receive_message', handleMsg);
+            socket.on('booking_status_updated', handleStatusUpdate);
 
             return () => {
                 socket.off('receive_message', handleMsg);
+                socket.off('booking_status_updated', handleStatusUpdate);
                 socket.disconnect();
             };
         }
@@ -115,8 +128,36 @@ function TrackOrderModal({ booking, onClose }) {
 
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col min-h-0 bg-slate-50 relative overflow-hidden pt-12">
+                    <div className="absolute top-5 left-6 z-[60]">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order ID: {booking.customBookingId}</p>
+                    </div>
                     <AnimatePresence initial={false} mode="wait">
-                        {!showChat && !showVendorProfile ? (
+                        {isCompleted ? (
+                            <motion.div
+                                key="completed"
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="flex-1 flex flex-col items-center justify-center p-8 text-center"
+                            >
+                                <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-6 border-4 border-emerald-100 shadow-xl shadow-emerald-100/50">
+                                    <CheckCircle2 size={48} />
+                                </div>
+                                <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-2">Service Completed!</h3>
+                                <p className="text-sm font-bold text-slate-400 mb-8">Your professional has marked the job as finished. We hope you liked the service!</p>
+
+                                <div className="w-full space-y-3">
+                                    <button
+                                        onClick={() => {
+                                            // Trigger review modal logic if available or just close
+                                            onClose();
+                                        }}
+                                        className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg"
+                                    >
+                                        Back to My Orders
+                                    </button>
+                                </div>
+                            </motion.div>
+                        ) : !showChat && !showVendorProfile ? (
                             <motion.div
                                 key="profile"
                                 initial={{ x: -20, opacity: 0 }}
