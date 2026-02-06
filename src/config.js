@@ -1,9 +1,9 @@
 
 // Central Configuration for API Config
+// Central Configuration for API Config
 export const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:3001";
 export const API_URL = `${BASE_URL}/api/auth`;
 
-// Helper for Image URLs (if they are relative paths from DB)
 // Helper for Image URLs (if they are relative paths from DB)
 export const getImageUrl = (path) => {
     if (!path) return "https://via.placeholder.com/150";
@@ -22,7 +22,6 @@ export const getImageUrl = (path) => {
     let cleanPath = path.toString().replace(/\\/g, '/');
 
     // 4. Handle cases where the path might be an absolute local path from another machine
-    // We try to find the 'uploads/' segment which is where our static assets live
     if (cleanPath.includes('uploads/')) {
         cleanPath = 'uploads/' + cleanPath.split('uploads/').pop();
     }
@@ -32,5 +31,7 @@ export const getImageUrl = (path) => {
         cleanPath = cleanPath.substring(1);
     }
 
-    return `${BASE_URL}/${cleanPath}`;
+    // 6. Ensure we use the current BASE_URL (which might be local or prod)
+    const finalUrl = `${BASE_URL}/${cleanPath}`;
+    return finalUrl;
 };
