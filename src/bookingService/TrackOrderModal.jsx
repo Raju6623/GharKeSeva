@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Phone, MapPin, User, CheckCircle2, Clock, Check, MoreVertical, MessageSquare, Shield, MessageCircle, Star, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
-import { BASE_URL, API_URL } from '../config';
+import { BASE_URL, API_URL, getImageUrl } from '../config';
 import ReviewsModal from '../components/ReviewsModal';
 
 const formatJoinedDuration = (date) => {
@@ -177,7 +177,7 @@ function TrackOrderModal({ booking, onClose }) {
                                                 <div className="w-20 h-20 rounded-2xl bg-slate-100 overflow-hidden border-2 border-white shadow-md group-hover:scale-105 transition-transform">
                                                     {(vendor.photo || vendor.vendorPhoto) ? (
                                                         <img
-                                                            src={vendor.photo || vendor.vendorPhoto}
+                                                            src={getImageUrl(vendor.photo || vendor.vendorPhoto)}
                                                             alt="Vendor"
                                                             className="w-full h-full object-cover"
                                                         />
@@ -304,7 +304,7 @@ function TrackOrderModal({ booking, onClose }) {
                                     <div className="w-32 h-32 mx-auto rounded-full p-1 bg-white shadow-xl relative z-10">
                                         {(vendor?.photo || vendor?.vendorPhoto) ? (
                                             <img
-                                                src={vendor?.photo || vendor?.vendorPhoto}
+                                                src={getImageUrl(vendor?.photo || vendor?.vendorPhoto)}
                                                 alt="Vendor"
                                                 className="w-full h-full object-cover rounded-full border-4 border-white"
                                             />
