@@ -116,21 +116,30 @@ function TrackOrderModal({ booking, onClose }) {
                 animate={{ y: 0, opacity: 1 }}
                 className="bg-white w-full max-w-md h-[95vh] flex flex-col rounded-[2.5rem] overflow-hidden shadow-2xl relative"
             >
-                {/* Close Button */}
-                <div className="absolute top-4 right-4 z-[60]">
+                {/* Header Section */}
+                <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-[70]">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-lg font-black text-slate-800 tracking-tight">Track Order</h2>
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${currentStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                currentStatus === 'Cancelled' ? 'bg-red-50 text-red-600 border-red-100' :
+                                    'bg-blue-50 text-blue-600 border-blue-100'
+                                }`}>
+                                {currentStatus}
+                            </span>
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">ID: {booking.customBookingId}</p>
+                    </div>
                     <button
                         onClick={onClose}
-                        className="p-2 bg-slate-100/80 hover:bg-slate-200 rounded-full transition-all text-slate-800 backdrop-blur-sm shadow-sm"
+                        className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-all text-slate-600"
                     >
-                        <X size={20} />
+                        <X size={18} />
                     </button>
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col min-h-0 bg-slate-50 relative overflow-hidden pt-12">
-                    <div className="absolute top-5 left-6 z-[60]">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order ID: {booking.customBookingId}</p>
-                    </div>
+                <div className="flex-1 flex flex-col min-h-0 bg-slate-50 relative overflow-hidden">
                     <AnimatePresence initial={false} mode="wait">
                         {isCompleted ? (
                             <motion.div
@@ -269,6 +278,18 @@ function TrackOrderModal({ booking, onClose }) {
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Assigning nearby specialist shortly...</p>
                                     </div>
                                 )}
+
+                                {/* Support Link */}
+                                <div className="mt-8 text-center pb-8">
+                                    <a
+                                        href={`https://wa.me/919241333130?text=Hi%20GharKeSeva,%20I%20need%20help%20with%20Order%20ID:%20${booking.customBookingId}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-[10px] font-bold text-slate-500 hover:text-green-600 hover:border-green-200 transition-all shadow-sm"
+                                    >
+                                        <MessageCircle size={14} /> Need Help? Chat with Support
+                                    </a>
+                                </div>
                             </motion.div>
                         ) : showVendorProfile ? (
                             <motion.div

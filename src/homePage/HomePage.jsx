@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import HeroSection from './HeroSection';
+import PatnaSpecialBanner from './PatnaSpecialBanner';
 import GharKeSevaHero from './GharKeSevaHero';
 import PromotionalBanners from './PromotionalBanners';
 import TrendingServices from './TrendingServices';
@@ -136,12 +137,15 @@ function HomePage() {
       {/* 1. HERO SECTION (Cinematic Motion - Restored) */}
       <HeroSection />
 
+      {/* NEW: PATNA SPECIAL BANNER */}
+      <PatnaSpecialBanner />
+
       {/* 2. CATEGORIES (GharKeSeva Style Grid) */}
-      <div className="relative z-20 -mt-10">
+      <div className="relative z-20">
         <GharKeSevaHero />
       </div>
 
-      {/* 3. SPOTLIGHT BANNER (Moved Up) */}
+      {/* 3. SPOTLIGHT BANNER */}
       <SpotlightBanner />
 
       {/* 4. PROMOTIONAL BANNERS */}

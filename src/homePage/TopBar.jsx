@@ -493,21 +493,7 @@ function TopBar() {
 
   return (
     <>
-      {/* Dynamic Announcement Bar */}
-      <div className="bg-gradient-to-r from-slate-900 via-teal-900 to-slate-900 text-white overflow-hidden py-2 relative z-[101] border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-center">
-          <div className="flex items-center gap-3 animate-pulse">
-            <div className="bg-teal-500/20 p-1 rounded-full"><MapPin size={14} className="text-teal-400" /></div>
-            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
-              <span className="text-teal-400 hidden sm:inline">Exclusive:</span>
-              Residents of <span className="underline decoration-teal-500 underline-offset-4">Patna</span> get <span className="text-yellow-400">15% EXTRA OFF</span> on Sundays!
-              <span className="hidden md:inline-flex items-center gap-2 ml-4 px-2 py-0.5 bg-white/10 rounded border border-white/10 font-mono text-teal-300">
-                Code: PATNA15
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
+
 
       <header className="w-full bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-[100]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
