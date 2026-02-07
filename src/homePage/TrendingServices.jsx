@@ -32,6 +32,23 @@ function TrendingServices() {
 
     if (uniqueServices.length === 0) return null;
 
+    // Helper to clean up messed up titles
+    const cleanTitle = (title) => {
+        if (!title) return "";
+        let cleaned = title;
+        // Fix double words "Women Women"
+        cleaned = cleaned.replace(/\b(\w+)\s+\1\b/gi, "$1");
+
+        // Fix specific known concatenation errors
+        if (cleaned.includes("Salon for Women") && cleaned.includes("Men's Salon")) {
+            if (cleaned.startsWith("Salon for Women")) cleaned = cleaned.replace("Men's Salon", "");
+        }
+        if (cleaned.includes("Salon for Men") && cleaned.includes("Women's Salon")) {
+            if (cleaned.startsWith("Salon for Men")) cleaned = cleaned.replace("Women's Salon", "");
+        }
+        return cleaned.replace(/\s+/g, ' ').trim();
+    };
+
     const serviceCards = uniqueServices.map((service) => (
         <Link
             to={getServiceRoute(service.serviceCategory || service.category)}
@@ -41,7 +58,7 @@ function TrendingServices() {
             {/* Title Top-Left */}
             <div className="z-10 relative">
                 <h3 className="font-bold text-[15px] text-slate-800 leading-tight mb-1 line-clamp-2">
-                    {service.packageName}
+                    {cleanTitle(service.packageName)}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center gap-1 text-[11px] text-slate-400 font-bold uppercase tracking-wider">

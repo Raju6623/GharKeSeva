@@ -22,6 +22,23 @@ function CategorySection({ title, services, categoryLink }) {
     // Deduplicate services to prevent key errors
     const uniqueServices = Array.from(new Map(services.map(item => [item._id, item])).values());
 
+    // Helper to clean up messed up titles
+    const cleanTitle = (title) => {
+        if (!title) return "";
+        let cleaned = title;
+        // Fix double words "Women Women"
+        cleaned = cleaned.replace(/\b(\w+)\s+\1\b/gi, "$1");
+
+        // Fix specific known concatenation errors
+        if (cleaned.includes("Salon for Women") && cleaned.includes("Men's Salon")) {
+            if (cleaned.startsWith("Salon for Women")) cleaned = cleaned.replace("Men's Salon", "");
+        }
+        if (cleaned.includes("Salon for Men") && cleaned.includes("Women's Salon")) {
+            if (cleaned.startsWith("Salon for Men")) cleaned = cleaned.replace("Women's Salon", "");
+        }
+        return cleaned.replace(/\s+/g, ' ').trim();
+    };
+
     const serviceSlides = uniqueServices.map((service) => (
         <SwiperSlide key={service._id} className="h-auto">
             <Link
@@ -31,9 +48,9 @@ function CategorySection({ title, services, categoryLink }) {
                 {/* Title Top-Left */}
                 <div className="z-10 relative">
                     <h3 className="font-bold text-[15px] text-slate-800 leading-tight mb-1 line-clamp-2">
-                        {service.packageName}
+                        {cleanTitle(service.packageName)}
                     </h3>
-                    <p className="text-slate-400 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
+                    <p className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">
                         {t('starting')} ₹{service.priceAmount}
                     </p>
                 </div>

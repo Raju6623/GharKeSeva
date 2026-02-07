@@ -552,13 +552,13 @@ export const translations = {
         expert_desc: "Expert cleaning, repairs, and grooming delivered to your doorstep.",
 
         // Service Pages (Titles & Breadcrumbs)
-        ac_service_title: "AC Service & Repair",
+        ac_service_title: "AC Services",
         ac_breadcrumb: "AC Services",
-        plumbing_title: "Plumbing Services",
+        plumbing_title: "Plumbing",
         plumbing_breadcrumb: "Plumbing",
         carpenter_title: "Carpenter Services",
         carpenter_breadcrumb: "Carpenter",
-        electrician_title: "Electrician Services",
+        electrician_title: "Electronic",
         electrician_breadcrumb: "Electrician",
         cleaning_title: "Cleaning Services",
         cleaning_breadcrumb: "Cleaning",

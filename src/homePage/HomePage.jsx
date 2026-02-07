@@ -69,12 +69,28 @@ function HomePage() {
 
     // Normalization for consistency and translation support
     const lowerCat = cat.toLowerCase();
+    const packageName = (service.packageName || "").toLowerCase();
+    const serviceTags = (service.tag || "").toLowerCase();
 
-    if (lowerCat.includes('ac') || lowerCat.includes('condit')) {
-      cat = "ac_service_title";
+    // Combining searchable text to check for forbidden keywords
+    const searchStr = `${packageName} ${lowerCat} ${serviceTags}`;
+
+    // HELPER: Strict word boundary check
+    const hasStrict = (term) => new RegExp(`\\b${term}\\b`, 'i').test(searchStr);
+
+    if (hasStrict('ac') || lowerCat.includes('condit')) {
+      // Safety check: if it's AC, it shouldn't have salon keywords
+      const salonKeywords = ['facial', 'massage', 'salon', 'waxing', 'haircut', 'cleanup', 'makeup'];
+      const isSalonExclusion = salonKeywords.some(kw => new RegExp(`\\b${kw}\\b`, 'i').test(searchStr));
+
+      if (!isSalonExclusion) {
+        cat = "ac_service_title";
+      } else {
+        cat = "salon"; // Fallback if it's actually salon
+      }
     } else if (lowerCat.includes('salon')) {
-      if (service.packageName?.toLowerCase().includes('women') || lowerCat.includes('women')) cat = "salon_women";
-      else if (service.packageName?.toLowerCase().includes('men') || lowerCat.includes('men')) cat = "salon_men";
+      if (packageName.includes('women') || lowerCat.includes('women')) cat = "salon_women";
+      else if (packageName.includes('men') || lowerCat.includes('men')) cat = "salon_men";
       else cat = "salon";
     } else if (lowerCat.includes('plumb')) {
       cat = "plumbing_title";
@@ -84,7 +100,7 @@ function HomePage() {
       cat = "carpenter_title";
     } else if (lowerCat.includes('cleaning') || lowerCat.includes('maid')) {
       cat = "cleaning_title";
-    } else if (lowerCat.includes('ro') || lowerCat.includes('purifier')) {
+    } else if (hasStrict('ro') || lowerCat.includes('purifier')) {
       cat = "ro_title";
     } else if (lowerCat.includes('paint')) {
       cat = "painting_title";
