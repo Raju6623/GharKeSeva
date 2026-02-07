@@ -206,17 +206,34 @@ function ServicePageLayout({
                 const lowerCat = cat.toLowerCase();
                 const pageCat = (category || "").toLowerCase();
 
-                // Custom Renaming for better UX
-                if (lowerCat === 'fan') label = "Fan Services";
-                if (lowerCat === 'standard') label = "Standard Plans";
-                if (lowerCat === 'hair cut') label = "Haircut Services";
-                if (lowerCat === 'makeup') label = "Makeup Services";
-                if (lowerCat === 'instapower') label = "InstaPower (Urgent)";
-                if (lowerCat === 'instahelp') label = "InstaHelp (Urgent)";
+                // 1. Determine Main Category Prefix for Context
+                let mainPrefix = category.replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
-                // Context-aware Renaming
-                if (pageCat.includes('electrician') && lowerCat === 'switch') label = "Switch & Sockets";
-                if (pageCat.includes('plumbing') && lowerCat === 'tap') label = "Tap & Mixer Repair";
+                if (pageCat.includes('ac')) mainPrefix = "AC";
+                if (pageCat.includes('electrician')) mainPrefix = "Electrician";
+                if (pageCat.includes('plumbing')) mainPrefix = "Plumbing";
+                if (pageCat.includes('salon')) {
+                    if (pageCat.includes('men') && !pageCat.includes('women')) mainPrefix = "Men's Salon";
+                    else if (pageCat.includes('women')) mainPrefix = "Women's Salon";
+                    else mainPrefix = "Salon";
+                }
+
+                // 2. Custom Renaming with Prefix
+                if (lowerCat === 'fan') label = `${mainPrefix} - Fan Services`;
+                else if (lowerCat === 'standard') label = `${mainPrefix} - Standard Services`;
+                else if (lowerCat === 'hair cut' || lowerCat === 'haircut') label = `${mainPrefix} - Haircut`;
+                else if (lowerCat === 'makeup') label = `${mainPrefix} - Makeup`;
+                else if (lowerCat === 'instapower') label = `${mainPrefix} - InstaPower`;
+                else if (lowerCat === 'instahelp') label = `${mainPrefix} - InstaHelp`;
+                else if (lowerCat === 'switch') label = `${mainPrefix} - Switch & Sockets`;
+                else if (lowerCat === 'tap') label = `${mainPrefix} - Tap & Mixer Repair`;
+                else {
+                    // For other dynamic labels, if they are short or lack context, add the prefix
+                    const hasPrefix = lowerCat.includes(mainPrefix.toLowerCase());
+                    if (label.length < 10 && !hasPrefix) {
+                        label = `${mainPrefix} - ${label}`;
+                    }
+                }
 
                 return {
                     id: `dynamic-${cat.replace(/\s+/g, '-').toLowerCase()}`,
@@ -246,11 +263,15 @@ function ServicePageLayout({
 
             // If pageCategory exists and is not "all services", do strict filtering
             if (pageCategory && pageCategory !== "all services") {
+                // Use word boundaries for short categories like "AC" to avoid matching "Advanced", "Account", etc.
+                const categoryRegex = new RegExp(`\\b${pageCategory}\\b`, 'i');
+
                 // Check if item matches the page category
-                const categoryMatch = itemCategory === pageCategory ||
+                const categoryMatch =
+                    itemCategory === pageCategory ||
                     itemServiceCategory === pageCategory ||
-                    itemName.includes(pageCategory) ||
-                    itemTags.includes(pageCategory);
+                    categoryRegex.test(itemName) ||
+                    categoryRegex.test(itemTags);
 
                 // If no match found, filter out this service
                 if (!categoryMatch) return false;
@@ -268,7 +289,6 @@ function ServicePageLayout({
 
                 if (genderType === "women") {
                     // Women's page: Block services with explicit MEN keywords UNLESS they also have WOMEN keywords
-                    // (e.g. "Men & Women Package" should show on both, but "Men's Salon" only on Men's)
                     if (hasMenStrict && !hasWomenStrict) return false;
                 }
 
@@ -280,12 +300,19 @@ function ServicePageLayout({
 
             // EXTRA SAFETY: Check for forbidden keywords based on page type
             if (pageCategory === "ac") {
-                // AC page should NOT show salon/beauty services
-                const salonKeywords = ['facial', 'cleanup', 'manicure', 'pedicure', 'waxing', 'salon', 'massage', 'haircut', 'hair cut', 'beard'];
-                const hasSalonKeyword = salonKeywords.some(kw =>
-                    itemName.includes(kw) || itemServiceCategory.includes(kw)
+                // AC page should NOT show salon/beauty/gendered services
+                const forbiddenKeywords = [
+                    'facial', 'cleanup', 'manicure', 'pedicure', 'waxing', 'salon',
+                    'massage', 'haircut', 'hair cut', 'beard', 'spa', 'women', 'men',
+                    'beauty', 'bridal', 'threading'
+                ];
+
+                const searchStr = `${itemName} ${itemServiceCategory} ${itemTags}`;
+                const hasForbiddenKeyword = forbiddenKeywords.some(kw =>
+                    new RegExp(`\\b${kw}\\b`, 'i').test(searchStr)
                 );
-                if (hasSalonKeyword) return false;
+
+                if (hasForbiddenKeyword) return false;
             }
 
             return true;
