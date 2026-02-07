@@ -288,7 +288,7 @@ function GharKeSevaHero() {
             </AnimatePresence>
             {/* Floating WhatsApp Button */}
             <a
-                href="https://wa.me/919876543210?text=Hi%20GharKeSeva,%20I%20need%20help%20with%20booking"
+                href="https://wa.me/919241333130?text=Hi%20GharKeSeva,%20I%20need%20help%20with%20booking"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="fixed bottom-6 right-6 z-[9999] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center justify-center border-4 border-white"

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { registerUser } from '../redux/thunks/authThunks';
@@ -12,6 +12,8 @@ function RegisterScreen() {
   const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   React.useEffect(() => {
     const pendingRef = localStorage.getItem('pendingReferral');
@@ -180,8 +182,46 @@ function RegisterScreen() {
       <div><label className={labelClass}>{t('landmark')}</label><input type="text" name="landmark" value={formData.landmark} onChange={handleInputChange} className={inputClass} /></div>
 
       <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
-        <div><label className={labelClass}>{t('password')}</label><input type="password" name="password" value={formData.password} onChange={handleInputChange} required className={inputClass} /></div>
-        <div><label className={labelClass}>{t('confirm_password')}</label><input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange} required className={inputClass} /></div>
+        <div>
+          <label className={labelClass}>{t('password')}</label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+              className={inputClass}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
+        <div>
+          <label className={labelClass}>{t('confirm_password')}</label>
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              required
+              className={inputClass}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 mt-2">

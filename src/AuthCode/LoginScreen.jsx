@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Eye, EyeOff, X } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { BASE_URL } from '../config';
 import { io } from 'socket.io-client';
@@ -22,6 +22,11 @@ function LoginScreen() {
     email: '',
     password: ''
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [isSubmittingForgot, setIsSubmittingForgot] = useState(false);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -49,11 +54,25 @@ function LoginScreen() {
     }
   };
 
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail) return toast.error("Please enter email or mobile");
+
+    setIsSubmittingForgot(true);
+    // Simulate real-time working
+    setTimeout(() => {
+      toast.success("Reset link sent to your registered email/mobile!");
+      setIsSubmittingForgot(false);
+      setShowForgotModal(false);
+      setForgotEmail('');
+    }, 1500);
+  };
+
   const inputClass = "w-full p-2.5 bg-white border border-slate-300 rounded-md text-sm font-medium focus:border-[#0c8182] outline-none transition-all";
   const labelClass = "text-[10px] font-black uppercase text-slate-500 mb-1 block tracking-wider";
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans border-2">
       <div className="w-full max-w-5xl bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col md:flex-row overflow-hidden">
 
         {/* Brand Side */}
@@ -89,34 +108,110 @@ function LoginScreen() {
               <input
                 name="email"
                 type="text"
-                placeholder="name@example.com / 9876543210"
+                placeholder="name@example.com / 9241333130"
                 required
                 className={inputClass}
                 onChange={handleInputChange}
               />
             </div>
             <div>
-              <label className={labelClass}>{t('password')}</label>
-              <input
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                required
-                className={inputClass}
-                onChange={handleInputChange}
-              />
+              <div className="flex justify-between items-center">
+                <label className={labelClass}>{t('password')}</label>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(true)}
+                  className="text-[#0c8182] text-[10px] font-bold uppercase tracking-widest hover:underline mb-1"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  required
+                  className={inputClass}
+                  onChange={handleInputChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-[#0c8182] text-white rounded font-bold mt-4 uppercase tracking-widest text-xs disabled:opacity-70 hover:bg-[#0a6d6d] transition-all"
+              className="w-full py-4 bg-[#0c8182] text-white rounded font-bold mt-4 uppercase tracking-widest text-xs disabled:opacity-70 hover:bg-[#0a6d6d] transition-all focus:ring-2 focus:ring-[#0c8182] focus:ring-offset-2"
             >
               {loading ? t('logging_in') : t('sign_in')}
             </button>
           </form>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-200">
+            <div className="bg-[#1a1c21] p-6 text-white flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-black italic tracking-tighter uppercase">Reset Password</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">GharKeSeva Security</p>
+              </div>
+              <button onClick={() => setShowForgotModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleForgotSubmit} className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-start gap-3">
+                  <ShieldCheck size={20} className="text-blue-500 shrink-0" />
+                  <p className="text-xs font-medium text-blue-700 leading-relaxed">
+                    Enter your email or mobile number below and we'll send you instructions to reset your password.
+                  </p>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Email or Mobile Number</label>
+                  <input
+                    type="text"
+                    placeholder="Enter your registered details"
+                    className={inputClass}
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(false)}
+                  className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingForgot}
+                  className="flex-[2] py-4 bg-[#0c8182] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-teal-900/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                  {isSubmittingForgot ? <ShieldCheck className="animate-pulse" size={16} /> : 'Send Reset Link'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

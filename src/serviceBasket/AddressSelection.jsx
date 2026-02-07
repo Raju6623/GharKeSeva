@@ -87,7 +87,7 @@ function AddressSelection() {
   const authUser = useSelector((state) => state.auth.user);
 
   // User Data (Prefer Redux > LocalStorage > Guest)
-  const user = authUser || JSON.parse(localStorage.getItem('user')) || { userFullName: "Guest", userPhone: "9876543210" };
+  const user = authUser || JSON.parse(localStorage.getItem('user')) || { userFullName: "Guest", userPhone: "9241333130" };
 
   // Fetch Logic on Mount (if empty)
   React.useEffect(() => {
@@ -603,13 +603,251 @@ function AddressSelection() {
         </div>
       </header>
 
+
       <main className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
         {/* LEFT COLUMN: Details (Span 8) */}
         <section className="lg:col-span-8 space-y-6">
 
-          {/* Section 1: Slot Selection */}
+          {/* Section 0: Address Selection - MUST COME FIRST */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#effafa] flex items-center justify-center text-[#0c8182]">
+                  <MapPin size={18} />
+                </div>
+                <h2 className="text-lg font-bold text-slate-900">Delivery Address</h2>
+              </div>
+              {address && !isAddingAddress && (
+                <button
+                  onClick={() => setIsAddingAddress(true)}
+                  className="text-[#0c8182] text-sm font-bold hover:underline flex items-center gap-1"
+                >
+                  <Plus size={16} /> Add New
+                </button>
+              )}
+            </div>
+
+            {/* Current Address Display */}
+            {address && !isAddingAddress && (
+              <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Check size={16} className="text-green-600" />
+                      <span className="text-xs font-black text-green-700 uppercase tracking-wider">Selected Address</span>
+                    </div>
+                    <p className="text-sm font-bold text-slate-700">{address}</p>
+                  </div>
+                  <button
+                    onClick={() => setIsAddingAddress(true)}
+                    className="text-[#0c8182] text-xs font-bold hover:underline ml-4"
+                  >
+                    Change
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* No Address Warning */}
+            {!address && !isAddingAddress && (
+              <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <MapPin size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-orange-700 mb-1">No address selected</p>
+                    <p className="text-xs text-orange-600">Please add your delivery address to continue</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Saved Addresses List */}
+            {!isAddingAddress && savedAddresses.length > 0 && (
+              <div className="space-y-3 mb-4">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Saved Addresses</p>
+                {savedAddresses.map((addr) => (
+                  <div
+                    key={addr.id}
+                    onClick={() => handleSelectAddress(addr)}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedAddressId === addr.id
+                      ? 'border-[#0c8182] bg-[#effafa]'
+                      : 'border-gray-100 hover:border-gray-300'
+                      }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-slate-700 mb-1">{addr.fullName}</p>
+                        <p className="text-xs text-slate-500">{addr.formatted}</p>
+                        <p className="text-xs text-slate-400 mt-1">{addr.mobile}</p>
+                      </div>
+                      {selectedAddressId === addr.id && (
+                        <Check size={20} className="text-[#0c8182] flex-shrink-0" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add Address Button */}
+            {!address && !isAddingAddress && (
+              <button
+                onClick={() => setIsAddingAddress(true)}
+                className="w-full bg-[#0c8182] hover:bg-[#0a6d6d] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all"
+              >
+                <Plus size={18} /> Add Delivery Address
+              </button>
+            )}
+
+            {/* Address Form */}
+            {isAddingAddress && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1.5 block">Full Name</label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={addressForm.fullName}
+                      onChange={handleAddressFormChange}
+                      placeholder="Enter your name"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1.5 block">Mobile Number</label>
+                    <input
+                      type="tel"
+                      name="mobile"
+                      value={addressForm.mobile}
+                      onChange={handleAddressFormChange}
+                      placeholder="10-digit mobile number"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1.5 block">Pincode</label>
+                    <input
+                      type="text"
+                      name="pincode"
+                      value={addressForm.pincode}
+                      onChange={handleAddressFormChange}
+                      placeholder="6-digit pincode"
+                      maxLength="6"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1.5 block">House/Flat No.</label>
+                    <input
+                      type="text"
+                      name="houseNo"
+                      value={addressForm.houseNo}
+                      onChange={handleAddressFormChange}
+                      placeholder="House/Flat number"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1.5 block">Street/Area/Locality</label>
+                  <input
+                    type="text"
+                    name="area"
+                    value={addressForm.area}
+                    onChange={handleAddressFormChange}
+                    placeholder="Street name, area"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1.5 block">Landmark (Optional)</label>
+                  <input
+                    type="text"
+                    name="landmark"
+                    value={addressForm.landmark}
+                    onChange={handleAddressFormChange}
+                    placeholder="Nearby landmark"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1.5 block">City</label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={addressForm.city}
+                      onChange={handleAddressFormChange}
+                      placeholder="City"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1 mb-1.5 block">State</label>
+                    <input
+                      type="text"
+                      name="state"
+                      value={addressForm.state}
+                      onChange={handleAddressFormChange}
+                      placeholder="State"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Save for Future Checkbox */}
+                <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-xl">
+                  <input
+                    type="checkbox"
+                    id="saveForFuture"
+                    checked={saveForFuture}
+                    onChange={(e) => setSaveForFuture(e.target.checked)}
+                    className="w-4 h-4 text-[#0c8182] border-gray-300 rounded focus:ring-[#0c8182]"
+                  />
+                  <label htmlFor="saveForFuture" className="text-xs font-bold text-slate-600 cursor-pointer">
+                    Save this address for future bookings
+                  </label>
+                </div>
+
+                {/* Form Actions */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSaveAddress}
+                    className="flex-1 bg-[#0c8182] hover:bg-[#0a6d6d] text-white py-3 rounded-xl font-bold text-sm transition-all"
+                  >
+                    Confirm Address
+                  </button>
+                  {address && (
+                    <button
+                      onClick={() => setIsAddingAddress(false)}
+                      className="px-6 bg-gray-100 hover:bg-gray-200 text-slate-700 py-3 rounded-xl font-bold text-sm transition-all"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+
+                {/* Auto-detect Location Button */}
+                <button
+                  onClick={handleManualAutofill}
+                  className="w-full border-2 border-dashed border-gray-300 hover:border-[#0c8182] text-slate-600 hover:text-[#0c8182] py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all"
+                >
+                  <MapPin size={14} /> Use Current Location
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Section 1: Slot Selection */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-8 rounded-full bg-[#effafa] flex items-center justify-center text-[#0c8182]">
                 <Calendar size={18} />
@@ -617,14 +855,15 @@ function AddressSelection() {
               <h2 className="text-lg font-bold text-slate-900">{t('schedule_service')}</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${!address ? 'pointer-events-none opacity-40' : ''}`}>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider pl-1">{t('date_label')}</label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full bg-gray-50 border-input rounded-xl p-3.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                  disabled={!address}
+                  className="w-full bg-gray-50 border-input rounded-xl p-3.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all disabled:cursor-not-allowed"
                 />
               </div>
               <div className="space-y-1.5">
@@ -633,7 +872,8 @@ function AddressSelection() {
                   <select
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="w-full bg-gray-50 border-input rounded-xl p-3.5 text-sm font-bold text-slate-700 outline-none appearance-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all"
+                    disabled={!address}
+                    className="w-full bg-gray-50 border-input rounded-xl p-3.5 text-sm font-bold text-slate-700 outline-none appearance-none focus:ring-2 focus:ring-[#0c8182]/20 focus:border-[#0c8182] transition-all disabled:cursor-not-allowed"
                   >
                     <option>10:00 AM - 12:00 PM</option>
                     <option>12:00 PM - 02:00 PM</option>
@@ -643,6 +883,17 @@ function AddressSelection() {
                 </div>
               </div>
             </div>
+
+            {/* Address Required Overlay */}
+            {!address && (
+              <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center border-2 border-red-400">
+                <div className="text-center p-6">
+                  <MapPin size={40} className="mx-auto mb-3 text-red-500" />
+                  <p className="text-base font-black text-red-600 mb-2 uppercase tracking-wide">⚠️ Address Required</p>
+                  <p className="text-sm font-bold text-red-500">Please select delivery address first</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Section: Offers & Coupons (Moved Here) */}
@@ -814,7 +1065,7 @@ function AddressSelection() {
 
           {/* Support Links */}
           <div className="grid grid-cols-2 gap-4">
-            <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="bg-white/50 backdrop-blur-sm border border-green-100 hover:border-green-200 hover:bg-green-50/50 p-3 rounded-2xl flex items-center justify-center gap-3 transition-all group shadow-sm hover:shadow-md">
+            <a href="https://wa.me/919241333130" target="_blank" rel="noopener noreferrer" className="bg-white/50 backdrop-blur-sm border border-green-100 hover:border-green-200 hover:bg-green-50/50 p-3 rounded-2xl flex items-center justify-center gap-3 transition-all group shadow-sm hover:shadow-md">
               <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" className="w-5 h-5 group-hover:scale-110 transition-transform" alt="" />
               <span className="text-xs font-bold text-slate-600 group-hover:text-green-700">{t('whatsapp')}</span>
             </a>

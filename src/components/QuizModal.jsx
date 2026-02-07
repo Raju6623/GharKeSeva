@@ -44,7 +44,7 @@ const QuizModal = ({ isOpen, onClose, userId, onRewardEarned }) => {
                 setResult({ correct: res.data.correct, reward: res.data.reward });
                 if (res.data.correct) {
                     onRewardEarned();
-                    toast.success(`Correct! You won ${res.data.reward} GS Coins!`);
+                    toast.success(`Correct! You won ${res.data.reward} Coins!`);
                 } else {
                     toast.error("Oops! That was incorrect.");
                 }
@@ -120,8 +120,8 @@ const QuizModal = ({ isOpen, onClose, userId, onRewardEarned }) => {
                                             key={i}
                                             onClick={() => setSelectedOption(opt)}
                                             className={`w-full p-4 rounded-2xl text-left text-sm font-bold transition-all border-2 ${selectedOption === opt
-                                                    ? 'bg-pink-50 border-pink-500 text-pink-700 shadow-md'
-                                                    : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300'
+                                                ? 'bg-pink-50 border-pink-500 text-pink-700 shadow-md'
+                                                : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300'
                                                 }`}
                                         >
                                             <div className="flex items-center justify-between">
@@ -138,7 +138,7 @@ const QuizModal = ({ isOpen, onClose, userId, onRewardEarned }) => {
                                             <Trophy className="text-emerald-500 mb-3" size={40} />
                                             <h4 className="text-xl font-black italic mb-1 uppercase tracking-tighter">Legendary!</h4>
                                             <p className="text-xs font-bold uppercase tracking-widest mb-4 opacity-70">Correct Answer</p>
-                                            <p className="text-sm font-black bg-white px-4 py-2 rounded-xl border border-emerald-100 shadow-sm">+ {result.reward} GS Coins Earned</p>
+                                            <p className="text-sm font-black bg-white px-4 py-2 rounded-xl border border-emerald-100 shadow-sm">+ {result.reward} Coins Earned</p>
                                         </>
                                     ) : (
                                         <>

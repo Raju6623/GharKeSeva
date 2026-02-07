@@ -38,7 +38,7 @@ function ContactPage() {
       value: "+91 92413 33130",
       description: "Mon-Sat, 9am - 8pm",
       icon: <Phone className="text-[#0c8182]" size={24} />,
-      link: "tel:+919876543210"
+      link: "tel:+919241333130"
     },
     {
       id: 3,

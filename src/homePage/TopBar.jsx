@@ -89,9 +89,9 @@ function TopBar() {
       console.error("Voice search error:", event.error);
       setIsListening(false);
       if (event.error === 'not-allowed') {
-        toast.error("Microphone access denied.");
+        toast.error("Microphone access denied.", { duration: 2000 });
       } else {
-        toast.error("Could not recognize voice. Try again.");
+        toast.error("Could not recognize voice. Try again.", { duration: 2000 });
       }
     };
 
