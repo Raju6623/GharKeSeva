@@ -201,12 +201,30 @@ function ServicePageLayout({
                 if (!/[a-zA-Z]/.test(cat)) return false;
                 return true;
             })
-            .map(cat => ({
-                id: `dynamic-${cat.replace(/\s+/g, '-').toLowerCase()}`,
-                label: cat,
-                icon: <Scissors size={32} />,
-                isDynamic: true
-            }));
+            .map(cat => {
+                let label = cat;
+                const lowerCat = cat.toLowerCase();
+                const pageCat = (category || "").toLowerCase();
+
+                // Custom Renaming for better UX
+                if (lowerCat === 'fan') label = "Fan Services";
+                if (lowerCat === 'standard') label = "Standard Plans";
+                if (lowerCat === 'hair cut') label = "Haircut Services";
+                if (lowerCat === 'makeup') label = "Makeup Services";
+                if (lowerCat === 'instapower') label = "InstaPower (Urgent)";
+                if (lowerCat === 'instahelp') label = "InstaHelp (Urgent)";
+
+                // Context-aware Renaming
+                if (pageCat.includes('electrician') && lowerCat === 'switch') label = "Switch & Sockets";
+                if (pageCat.includes('plumbing') && lowerCat === 'tap') label = "Tap & Mixer Repair";
+
+                return {
+                    id: `dynamic-${cat.replace(/\s+/g, '-').toLowerCase()}`,
+                    label: label,
+                    icon: <Scissors size={32} />,
+                    isDynamic: true
+                };
+            });
 
         return [...categories, ...dynamicCategories];
     }, [categories, services, category]);

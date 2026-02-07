@@ -84,12 +84,36 @@ function ServiceCard({ service, categoryName, pageCategory }) {
         <li className="text-xs text-slate-400 italic">{t('includes_consultation')}</li>
     );
 
+    // Helper to clean up messed up titles
+    const cleanTitle = (title) => {
+        if (!title) return "";
+        let cleaned = title;
+        // Fix double words "Women Women"
+        cleaned = cleaned.replace(/\b(\w+)\s+\1\b/gi, "$1");
+
+        // Fix specific known concatenation errors
+        if (cleaned.includes("Salon for Women") && cleaned.includes("Men's Salon")) {
+            // Likely a bug, choose one based on first occurrence or page context
+            // But usually the first one is the intended category prefix
+            if (cleaned.startsWith("Salon for Women")) {
+                cleaned = cleaned.replace("Men's Salon", "");
+            }
+        }
+        if (cleaned.includes("Salon for Men") && cleaned.includes("Women's Salon")) {
+            if (cleaned.startsWith("Salon for Men")) {
+                cleaned = cleaned.replace("Women's Salon", "");
+            }
+        }
+
+        return cleaned.replace(/\s+/g, ' ').trim();
+    };
+
     return (
         <div className="flex bg-white py-6 border-b border-gray-100 last:border-0 group items-start gap-4">
             {/* Left Content */}
             <div className="flex-1">
                 <h3 className="font-bold text-slate-900 text-lg leading-tight mb-1.5 break-words line-clamp-2">
-                    {service.packageName}
+                    {cleanTitle(service.packageName)}
                 </h3>
 
                 {/* Rating Row */}
