@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, MapPin, Clock, User, LogOut, Package,
-    CreditCard, ShieldCheck, Mail, Phone, Home, Sparkles, CheckCircle2
+    CreditCard, ShieldCheck, Mail, Phone, Home, Sparkles, CheckCircle2,
+    Megaphone, Wallet
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
